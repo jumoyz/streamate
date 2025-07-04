@@ -1,0 +1,2883 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreaMate - Manage Your Streaming Subscriptions</title>
+    <meta name="description" content="StreaMate helps you manage all your streaming subscriptions in one place.">
+    <meta name="keywords" content="streaming, subscriptions, Netflix, Disney+, Prime Video, Spotify, manage subscriptions">
+    <meta name="author" content="TMSHT.COM">
+    <meta name="theme-color" content="#6c5ce7">
+    <link rel="icon" href="icons/favicon.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+	<link rel="stylesheet" href="styles/app.css">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --dark-color: #2d3436;
+            --light-color: #f5f6fa;
+            --success-color: #00b894;
+            --warning-color: #fdcb6e;
+            --danger-color: #d63031;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: var(--dark-color);
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+        }
+        
+        .nav-link {
+            color: var(--dark-color) !important;
+            font-weight: 500;
+        }
+        
+        .nav-link.active {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.7rem;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+            .notification-item.unread {
+        background-color: rgba(13, 110, 253, 0.05);
+        font-weight: 500;
+    }
+    .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+    .badge.bg-info, .badge.bg-warning, .badge.bg-danger {
+        color: white !important;
+    }
+    .notification-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #5649c0;
+            border-color: #5649c0;
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+        }
+        
+        .service-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            animation: fadeOut 1s ease-in-out 2s forwards;
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+        
+        .splash-logo {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .splash-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .auth-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(108, 92, 231, 0.25);
+        }
+        
+        .subscription-badge {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 50px;
+        }
+        
+        .badge-active {
+            background-color: var(--success-color);
+        }
+        
+        .badge-expired {
+            background-color: var(--danger-color);
+        }
+        
+        .badge-pending {
+            background-color: var(--warning-color);
+            color: var(--dark-color);
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--secondary-color);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.6rem;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .unread {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        .message-content {
+            white-space: pre-line;
+        }
+        .reply {
+            white-space: pre-line;
+        }
+
+            .list-group-item.active {
+        background-color: #6c5ce7;
+        border-color: #6c5ce7;
+    }
+    
+    .form-check.form-switch .form-check-input {
+        width: 3em;
+        margin-left: -1.5em;
+    }
+    
+    .tab-content {
+        padding-left: 15px;
+    }
+        
+        .service-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: scale(1.03);
+        }
+        
+        .netflix-card {
+            background: linear-gradient(135deg, #e50914, #b00710);
+            color: white;
+        }
+        
+        .disney-card {
+            background: linear-gradient(135deg, #113ccf, #0b1d8f);
+            color: white;
+        }
+        
+        .prime-card {
+            background: linear-gradient(135deg, #00a8e1, #007eb0);
+            color: white;
+        }
+        
+        .spotify-card {
+            background: linear-gradient(135deg, #1db954, #1aa34a);
+            color: white;
+        }
+        
+        .plan-card {
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .plan-card:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .plan-card.featured {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .payment-method {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(108, 92, 231, 0.05);
+        }
+        
+        .payment-method.active {
+            border-color: var(--primary-color);
+            background-color: rgba(108, 92, 231, 0.1);
+        }
+        
+        .admin-sidebar {
+            min-height: 100vh;
+            background-color: var(--dark-color);
+            color: white;
+        }
+        
+        .admin-sidebar .nav-link {
+            color: white !important;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+        }
+        
+        .admin-sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-sidebar .nav-link.active {
+            background-color: var(--primary-color);
+        }
+        
+        .stats-card {
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .stats-card.revenue {
+            border-left-color: var(--success-color);
+        }
+        
+        .stats-card.users {
+            border-left-color: var(--accent-color);
+        }
+        
+        .stats-card.subscriptions {
+            border-left-color: var(--warning-color);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .auth-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .service-icon {
+                font-size: 2rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-logo">StreaMate</div>
+        <div class="splash-spinner"></div>
+        <div class="mt-3">Loading your streaming experience...</div>
+    </div>
+
+    <!-- Auth Views (initially hidden) -->
+    <div id="authViews" style="display: none;">
+        <!-- Login View -->
+        <div class="container py-5" id="loginView">
+            <div class="auth-container">
+                <h2 class="text-center mb-4">Welcome to StreaMate</h2>
+                <p class="text-center mb-4">Manage all your streaming subscriptions in one place</p>
+                
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="loginEmail" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="loginEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loginPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="loginPassword" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p>Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+                    <p>or continue with</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button class="btn btn-outline-primary"><i class="fab fa-google"></i> Google</button>
+                        <button class="btn btn-outline-primary"><i class="fab fa-facebook-f"></i> Facebook</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup View -->
+        <div class="container py-5" id="signupView" style="display: none;">
+            <div class="auth-container">
+                <h2 class="text-center mb-4">Create Your Account</h2>
+                <p class="text-center mb-4">Join StreaMate to manage your streaming subscriptions</p>
+                
+                <form id="signupForm">
+                    <div class="mb-3">
+                        <label for="signupName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="signupName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signupEmail" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="signupEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signupPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="signupPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="signupConfirmPassword" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Views (initially hidden) -->
+    <div id="appViews" style="display: none;">
+        <!-- User App View -->
+        <div id="userApp">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+                <div class="container">
+                    <a class="navbar-brand" href="#">StreaMate</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" data-view="home"><i class="fas fa-home"></i> Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-view="subscriptions"><i class="fas fa-list"></i> Subscriptions</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-view="profiles"><i class="fas fa-user"></i> Profiles</a>
+                            </li>
+                            <li class="nav-item position-relative">
+                                <a class="nav-link" href="#" data-view="newstips"><i class="fas fa-bullhorn"></i> News & Tips</a>
+                            </li>
+                            <li class="nav-item position-relative">
+                                <a class="nav-link" href="#" data-view="notifications">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="notification-badge"></span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-view="support"><i class="fas fa-question-circle"></i> </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-view="profile"><i class="fas fa-cog"></i> </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container py-4" id="appContent">
+                <!-- Home View -->
+                <div id="homeView">
+                    <h3 class="mb-4">Welcome back, <span id="userName">User</span>!</h3>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Your Netflix subscription renews in 3 days.
+                    </div>
+                    
+                    <h4 class="mt-4 mb-3">Your Active Subscriptions</h4>
+                    <div class="row" id="activeSubscriptions">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                    
+                    <h4 class="mt-5 mb-3">Available Services</h4>
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card service-card netflix-card p-4 text-center">
+                                <i class="fab fa-netflix service-icon"></i>
+                                <h5>Netflix</h5>
+                                <p>Premium shared accounts</p>
+                                <button class="btn btn-light mt-2" data-service="netflix">Subscribe</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card service-card disney-card p-4 text-center">
+                                <i class="fab fa-disney service-icon"></i>
+                                <h5>Disney+</h5>
+                                <p>All your favorite content</p>
+                                <button class="btn btn-light mt-2" data-service="disney">Subscribe</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card service-card prime-card p-4 text-center">
+                                <i class="fab fa-amazon service-icon"></i>
+                                <h5>Prime Video</h5>
+                                <p>Exclusive Amazon originals</p>
+                                <button class="btn btn-light mt-2" data-service="prime">Subscribe</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card service-card spotify-card p-4 text-center">
+                                <i class="fab fa-spotify service-icon"></i>
+                                <h5>Spotify</h5>
+                                <p>Unlimited music streaming</p>
+                                <button class="btn btn-light mt-2" data-service="spotify">Subscribe</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-5">
+                        <div class="card-header">
+                            <h5 class="mb-0">Recommended For You</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Based on your preferences, we recommend upgrading to our VIP plan for access to all services at a discounted rate.</p>
+                            <button class="btn btn-primary" data-view="plans">View Plans</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Subscriptions View -->
+                <div id="subscriptionsView" style="display: none;">
+                    <h3 class="mb-4">Your Subscriptions</h3>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Active Subscriptions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Service</th>
+                                            <th>Plan</th>
+                                            <th>Price</th>
+                                            <th>Renewal Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="subscriptionsTable">
+                                        <!-- Filled by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" data-view="plans">Add New Subscription</button>
+                </div>
+                
+                <!-- Plans View -->
+                <div id="plansView" style="display: none;">
+                    <h3 class="mb-4">Subscription Plans</h3>
+                    <p class="mb-4">Choose the plan that works best for you</p>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card plan-card h-100">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Basic</h5>
+                                    <h3 class="my-3">G500.00<span class="text-muted small">/month</span></h3>
+                                    <ul class="list-unstyled text-start">
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 1 Streaming Service</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Standard Quality</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 1 Profile</li>
+                                        <li class="mb-2"><i class="fas fa-times text-danger me-2"></i> No Premium Content</li>
+                                    </ul>
+                                    <button class="btn btn-outline-primary mt-3" data-plan="basic">Select Plan</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card plan-card h-100 featured">
+                                <div class="card-header">
+                                    <span class="badge bg-primary">Most Popular</span>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">VIP</h5>
+                                    <h3 class="my-3">G750.00<span class="text-muted small">/month</span></h3>
+                                    <ul class="list-unstyled text-start">
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 1 Streaming Service</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> HD Quality</li>
+                                         <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 1 Extra Member Slot</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 3 Profiles</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Premium Content</li>
+                                    </ul>
+                                    <button class="btn btn-primary mt-3" data-plan="vip">Select Plan</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card plan-card h-100">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Premium Bundle</h5>
+                                    <h3 class="my-3">G1500.00<span class="text-muted small">/month</span></h3>
+                                    <ul class="list-unstyled text-start">
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> All Streaming Services</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 4K Quality</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 5 Profiles</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> All Premium Content</li>
+                                    </ul>
+                                    <button class="btn btn-outline-primary mt-3" data-plan="premium">Select Plan</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment View -->
+                <div id="paymentView" style="display: none;">
+                    <h3 class="mb-4">Complete Your Subscription</h3>
+                    
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Selected Plan</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="selectedPlanInfo">
+                                        <!-- Filled by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Payment Method</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="payment-method" data-method="stripe">
+                                                <i class="fab fa-cc-stripe fa-2x mb-2"></i>
+                                                <h6>Credit/Debit Card</h6>
+                                                <p class="small text-muted">Pay with Visa, Mastercard, etc.</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="payment-method" data-method="moncash">
+                                                <i class="fas fa-mobile-alt fa-2x mb-2"></i>
+                                                <h6>MonCash</h6>
+                                                <p class="small text-muted">Mobile payment solution</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="payment-method" data-method="natcash">
+                                                <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                                                <h6>NatCash</h6>
+                                                <p class="small text-muted">Local payment method</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="payment-method" data-method="paypal">
+                                                <i class="fab fa-paypal fa-2x mb-2"></i>
+                                                <h6>PayPal</h6>
+                                                <p class="small text-muted">International payments</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="stripeForm" class="mt-4" style="display: none;">
+                                        <h6 class="mb-3">Card Details</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">Card Number</label>
+                                            <input type="text" class="form-control" placeholder="1234 5678 9012 3456">
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Expiry Date</label>
+                                                <input type="text" class="form-control" placeholder="MM/YY">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">CVV</label>
+                                                <input type="text" class="form-control" placeholder="123">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Name on Card</label>
+                                            <input type="text" class="form-control" placeholder="John Doe">
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="mobilePaymentForm" class="mt-4" style="display: none;">
+                                        <h6 class="mb-3">Mobile Payment Details</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">Phone Number</label>
+                                            <input type="tel" class="form-control" placeholder="+50912345678">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Order Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="orderSummary">
+                                        <!-- Filled by JavaScript -->
+                                    </div>
+                                    <div class="d-grid mt-3">
+                                        <button class="btn btn-primary" id="confirmPayment">Confirm Payment</button>
+                                    </div>
+                                    <p class="small text-muted mt-2">By completing your purchase, you agree to our Terms of Service and Privacy Policy.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Confirmation View -->
+                <div id="confirmationView" style="display: none;">
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                        </div>
+                        <h3 class="mb-3">Payment Successful!</h3>
+                        <p class="mb-4">Thank you for your subscription. Your account will be activated shortly.</p>
+                        <div class="card mb-4 mx-auto" style="max-width: 500px;">
+                            <div class="card-body text-start">
+                                <h5 class="card-title">Order Details</h5>
+                                <div id="confirmationDetails">
+                                    <!-- Filled by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" data-view="home">Back to Home</button>
+                    </div>
+                </div>
+                
+                <!-- Profiles View -->
+                <div id="profilesView" style="display: none;">
+                    <h3 class="mb-4">Your Streaming Profiles</h3>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Netflix Profiles</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="netflixProfiles">
+                                <!-- Filled by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Disney+ Profiles</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="disneyProfiles">
+                                <!-- Filled by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Request New Profile</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="profileRequestForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Service</label>
+                                    <select class="form-select" id="profileService">
+                                        <option value="netflix">Netflix</option>
+                                        <option value="disney">Disney+</option>
+                                        <option value="prime">Prime Video</option>
+                                        <option value="spotify">Spotify</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Profile Name</label>
+                                    <input type="text" class="form-control" id="profileName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Avatar (Optional)</label>
+                                    <input type="file" class="form-control" id="profileAvatar">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Request</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- News & Tips View -->
+                <div id="newstipsView" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3>News & Tips</h3>
+                        <button class="btn btn-sm btn-outline-primary" id="refreshNews">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh
+                        </button>
+                    </div>
+                    
+                    <!-- Personalized Recommendations -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i> Recommendations For You</h5>
+                        </div>
+                        <div class="card-body" id="recommendationsContainer">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading recommendations...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tips & Tricks -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-tips me-2"></i> Tips & Tricks</h5>
+                        </div>
+                        <div class="card-body" id="tipsContainer">
+                            <div class="row g-4" id="tipsList">
+                                <!-- Filled by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Latest News -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-newspaper me-2"></i> Latest News & Announcements</h5>
+                        </div>
+                        <div class="card-body" id="newsContainer">
+                            <div class="list-group" id="newsList">
+                                <!-- Filled by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subscription Health -->
+                    <div class="card">
+                        <div class="card-header bg-warning">
+                            <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i> Your Subscription Health</h5>
+                        </div>
+                        <div class="card-body" id="subscriptionHealth">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i> Your Netflix subscription renews in 3 days.
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <p class="small text-muted">Based on your usage patterns, you're getting great value from your subscriptions!</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notifications View -->
+                <div id="notificationsView" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3>Notifications</h3>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary me-2" onclick="refreshNotifications()">
+                                <i class="fas fa-sync-alt me-1"></i> Refresh
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="markAllAsRead()">
+                                <i class="fas fa-check-double me-1"></i> Mark All as Read
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush" id="notificationsList">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <button class="btn btn-link" onclick="loadMoreNotifications()">
+                            <i class="fas fa-chevron-down me-1"></i> Load More
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Support View -->
+                <div id="supportView" style="display: none;">
+                    <h3 class="mb-4">Support Center</h3>
+                    
+                    <!-- Feedback Form -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-comment-dots me-2"></i> Send Us Your Feedback</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="feedbackForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="feedbackFirstName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="feedbackEmail" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Subject</label>
+                                    <select class="form-select" id="feedbackSubject" required>
+                                        <option value="">Select a subject</option>
+                                        <option value="General Feedback">General Feedback</option>
+                                        <option value="Bug Report">Bug Report</option>
+                                        <option value="Feature Request">Feature Request</option>
+                                        <option value="Account Help">Account Help</option>
+                                        <option value="Billing Issue">Billing Issue</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Your Message</label>
+                                    <textarea class="form-control" id="feedbackMessage" rows="5" required></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane me-2"></i> Send Message
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Live Support Options -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-headset me-2"></i> Live Support Options</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="fab fa-whatsapp fa-3x text-success mb-3"></i>
+                                            <h5>WhatsApp Support</h5>
+                                            <p class="text-muted">Get instant help via WhatsApp</p>
+                                            <a href="https://wa.me/50944393349" class="btn btn-success w-100">
+                                                <i class="fab fa-whatsapp me-2"></i> Start Chat
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="fab fa-telegram fa-3x text-info mb-3"></i>
+                                            <h5>Telegram Support</h5>
+                                            <p class="text-muted">Chat with our Telegram bot</p>
+                                            <a href="https://t.me/50944393349" class="btn btn-info w-100">
+                                                <i class="fab fa-telegram me-2"></i> Start Chat
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
+                                            <h5>Email Support</h5>
+                                            <p class="text-muted">Get help within 24 hours</p>
+                                            <a href="mailto:streamate@tmsht.com" class="btn btn-primary w-100">
+                                                <i class="fas fa-envelope me-2"></i> Email Us
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-phone-alt fa-3x text-warning mb-3"></i>
+                                            <h5>Phone Support</h5>
+                                            <p class="text-muted">Available 9AM-5PM, Mon-Fri</p>
+                                            <a href="tel:+509123405678" class="btn btn-warning w-100">
+                                                <i class="fas fa-phone-alt me-2"></i> Call +509 44 39 3349
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Section -->
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i> Frequently Asked Questions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="accordion" id="faqAccordion">
+                                <!-- FAQ items will be loaded here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile/Settings View -->
+                <div id="profileView" style="display: none;">
+                    <h3 class="mb-4">Account Settings</h3>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Personal Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="profileForm">
+                                <div class="row mb-3">
+                                    <div class="col-md-2">
+                                        <img src="images/user_avatar.png" class="profile-avatar" id="profileImage">
+                                    </div>
+                                    <div class="col-md-10">
+                                        <div class="mb-3">
+                                            <label class="form-label">Change Profile Picture</label>
+                                            <input type="file" class="form-control" id="profilePicture">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="firstName" value="John">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="lastName" value="Doe">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="profileEmail" value="john.doe@example.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="profilePhone" value="+1 234 567 8900">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Change Password</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="passwordForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Current Password</label>
+                                    <input type="password" class="form-control" id="currentPassword" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="newPassword" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirmNewPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Update Password</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Support</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Need help? Contact our support team via WhatsApp for quick assistance.</p>
+                            <a href="https://wa.me/50944393349" class="btn btn-success">
+                                <i class="fab fa-whatsapp me-2"></i> Chat with Support
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin App View -->
+        <div id="adminApp" style="display: none;">
+            <div class="d-flex">
+                <div class="admin-sidebar p-3" style="width: 250px;">
+                    <h4 class="text-center mb-4">StreaMate Admin</h4>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-view="adminDashboard"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="adminUsers"><i class="fas fa-users me-2"></i> Users</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="adminSubscriptions"><i class="fas fa-list me-2"></i> Subscriptions</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="adminProfiles"><i class="fas fa-user me-2"></i> Profiles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="adminPayments"><i class="fas fa-money-bill me-2"></i> Payments</a>
+                        </li>
+						<li class="nav-item">
+							<a class="nav-link" href="#" data-view="adminNewsTips"><i class="fas fa-info-circle me-2"></i> News & Tips</a>
+						</li>
+                        <li class="nav-item">
+							<a class="nav-link" href="#" data-view="adminNotificationsReminders"><i class="fas fa-bell me-2"></i> Notifications</a>
+						</li>
+                        <li class="nav-item">
+							<a class="nav-link" href="#" data-view="adminFeedbacksMessages"><i class="fas fa-comments me-2"></i> Messages</a>
+						</li>
+                        <li class="nav-item">
+							<a class="nav-link" href="#" data-view="adminActivityLogs"><i class="fas fa-history me-2"></i> Activity Logs</a>
+						</li>
+                        <li class="nav-item">
+							<a class="nav-link" href="#" data-view="adminReports"><i class="fas fa-chart-bar me-2"></i> Reports</a>
+						</li>
+                        <li class="nav-item">
+							<a class="nav-link" href="#" data-view="adminSettings"><i class="fas fa-cog me-2"></i> Settings</a>
+						</li>
+						<li class="nav-item mt-4">
+							<a class="nav-link" href="#" id="adminLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+						</li>
+					</ul>
+				</div>
+            
+            <div class="flex-grow-1 p-4">
+                <div id="adminContent">
+                    <!-- Admin Dashboard View -->
+                    <div id="adminDashboardView">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Dashboard Overview</h3>
+                            <!-- Filter -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dashboardRangeDropdown" data-bs-toggle="dropdown">
+                                    Last 30 Days
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Last 7 Days</a></li>
+                                    <li><a class="dropdown-item" href="#">Last 30 Days</a></li>
+                                    <li><a class="dropdown-item" href="#">Last 90 Days</a></li>
+                                    <li><a class="dropdown-item" href="#">This Year</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card stats-card revenue">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Total Revenue</h6>
+                                        <h3 class="card-title">G12,345</h3>
+                                        <p class="card-text text-success"><i class="fas fa-arrow-up me-1"></i> 12% from last month</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card stats-card users">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Active Users</h6>
+                                        <h3 class="card-title">1,234</h3>
+                                        <p class="card-text text-success"><i class="fas fa-arrow-up me-1"></i> 5% from last month</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card stats-card subscriptions">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Subscriptions</h6>
+                                        <h3 class="card-title">876</h3>
+                                        <p class="card-text text-danger"><i class="fas fa-arrow-down me-1"></i> 2% from last month</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card stats-card">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Renewals Due</h6>
+                                        <h3 class="card-title">156</h3>
+                                        <p class="card-text text-warning"><i class="fas fa-exclamation-circle me-1"></i> Needs attention</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Revenue Overview</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="revenueChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Service Distribution</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="serviceChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Recent Activity</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Action</th>
+                                                <th>Service</th>
+                                                <th>Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminRecentActivity">
+                                            <!-- Filled by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Users View -->
+                    <div id="adminUsersView" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>User Management</h3>
+                            <div>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                    <i class="fas fa-plus me-2"></i> Add User
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="form-control" placeholder="Search users..." id="userSearch">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text">Filter</span>
+                                            <select class="form-select" id="userFilter">
+                                                <option value="all">All Users</option>
+                                                <option value="active">Active</option>
+                                                <option value="inactive">Inactive</option>
+                                                <option value="vip">VIP Plan</option>
+                                                <option value="basic">Basic Plan</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Email</th>
+                                                <th>Plan</th>
+                                                <th>Status</th>
+                                                <th>Joined</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="usersTable">
+                                            <!-- Filled by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <nav aria-label="User pagination">
+                                    <ul class="pagination justify-content-center mt-4">
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                        </li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="#">Next</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Subscriptions View -->
+                    <div id="adminSubscriptionsView" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="mb-4">Subscription Management</h3>
+                            <div>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubscriptionModal">
+                                    <i class="fas fa-plus me-2"></i> Add Subscription
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">All Subscriptions</h5>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary me-2">
+                                            <i class="fas fa-download me-1"></i> Export
+                                        </button>
+                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#sendRemindersModal">
+                                            <i class="fas fa-bell me-1"></i> Send Renewal Reminders
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Service</th>
+                                                <th>Plan</th>
+                                                <th>Start Date</th>
+                                                <th>Renewal Date</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminSubscriptionsTable">
+                                            <!-- Filled by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Profiles View -->
+                    <div id="adminProfilesView" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Profile Management</h3>
+                            <div>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProfileModal">
+                                    <i class="fas fa-plus me-2"></i> Add Profile
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text">Service</span>
+                                            <select class="form-select" id="profileServiceFilter">
+                                                <option value="all">All Services</option>
+                                                <option value="netflix">Netflix</option>
+                                                <option value="disney">Disney+</option>
+                                                <option value="prime">Prime Video</option>
+                                                <option value="spotify">Spotify</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text">Status</span>
+                                            <select class="form-select" id="profileStatusFilter">
+                                                <option value="all">All Statuses</option>
+                                                <option value="assigned">Assigned</option>
+                                                <option value="available">Available</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="form-control" placeholder="Search profiles...">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Profile Name</th>
+                                                <th>Service</th>
+                                                <th>Assigned To</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="profilesTable">
+                                            <!-- Filled by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Payments View -->
+                    <div id="adminPaymentsView" style="display: none;">
+                        <h3 class="mb-4">Payment Management</h3>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Payment History</h5>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-primary me-2">
+                                                    <i class="fas fa-download me-1"></i> Export
+                                                </button>
+                                                <div class="btn-group">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                        Filter
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li><a class="dropdown-item" href="#">All Payments</a></li>
+                                                        <li><a class="dropdown-item" href="#">Successful</a></li>
+                                                        <li><a class="dropdown-item" href="#">Failed</a></li>
+                                                        <li><a class="dropdown-item" href="#">Pending</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Transaction ID</th>
+                                                        <th>User</th>
+                                                        <th>Amount</th>
+                                                        <th>Method</th>
+                                                        <th>Date</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="paymentsTable">
+                                                    <!-- Filled by JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Payment Methods</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="stripeSwitch" checked>
+                                                <label class="form-check-label" for="stripeSwitch">Stripe</label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="moncashSwitch" checked>
+                                                <label class="form-check-label" for="moncashSwitch">MonCash</label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="natcashSwitch" checked>
+                                                <label class="form-check-label" for="natcashSwitch">NatCash</label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="paypalSwitch">
+                                                <label class="form-check-label" for="paypalSwitch">PayPal</label>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary">Save Settings</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Pending Payments</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="list-group">
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1">John Doe</h6>
+                                                    <small class="text-muted">G500.00</small>
+                                                </div>
+                                                <p class="mb-1">VIP Plan Renewal</p>
+                                                <small class="text-warning"><i class="fas fa-clock me-1"></i> Pending since 2 days</small>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1">Jane Smith</h6>
+                                                    <small class="text-muted">G500.00</small>
+                                                </div>
+                                                <p class="mb-1">Basic Plan Payment</p>
+                                                <small class="text-warning"><i class="fas fa-clock me-1"></i> Pending since 1 day</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin News & Tips View -->
+                    <div id="adminNewsTipsView" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Latest News & Tips</h3>
+                            <div>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addNewsModal">
+                                    <i class="fas fa-plus me-2"></i> Add News
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text">Type</span>
+                                            <select class="form-select" id="profileServiceFilter">
+                                                <option value="all">All Types</option>
+                                                <option value="netflix">Announcements</option>
+                                                <option value="disney">Tips</option>
+                                                <option value="prime">Update</option>
+                                                <option value="spotify">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text">Status</span>
+                                            <select class="form-select" id="profileStatusFilter">
+                                                <option value="all">All Statuses</option>
+                                                <option value="assigned">Published</option>
+                                                <option value="assigned">Unpublished</option>
+                                                <option value="assigned">Draft</option>
+                                                <option value="available">Available</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="form-control" placeholder="Search profiles...">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Slug</th>
+                                                <th>Except</th>
+                                                <th>Status</th>
+                                                <th>Published on</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="NewsTipsTable">
+                                            <!-- Filled by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Notifications & Reminders View -->
+                    <div id="adminNotificationsRemindersView" style="display: none;">
+                        <h3 class="mb-4">Notifications & Reminders</h3>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary active" data-filter="all">All</button>
+                                    <button type="button" class="btn btn-outline-primary" data-filter="notifications">Notifications</button>
+                                    <button type="button" class="btn btn-outline-primary" data-filter="reminders">Reminders</button>
+                                    <button type="button" class="btn btn-outline-primary" data-filter="unread">Unread</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Search notifications..." id="notificationSearch">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Recent Notifications</h5>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary" id="markAllRead">
+                                        <i class="fas fa-check-circle me-1"></i> Mark All Read
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" id="clearAll">
+                                        <i class="fas fa-trash-alt me-1"></i> Clear All
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th width="40px"><input type="checkbox" id="selectAllNotifications"></th>
+                                                <th>Type</th>
+                                                <th>Title</th>
+                                                <th>Description</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Unread Notification Example -->
+                                            <tr class="notification-item unread" data-type="notification" data-id="1">
+                                                <td><input type="checkbox" class="notification-checkbox"></td>
+                                                <td><span class="badge bg-info"><i class="fas fa-bell"></i> Notification</span></td>
+                                                <td>New Service Added</td>
+                                                <td class="text-truncate" style="max-width: 200px;">HBO Max has been added to our streaming services...</td>
+                                                <td><span class="text-primary">Just Now</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary view-notification" data-id="1">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger delete-notification" data-id="1">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- Reminder Example -->
+                                            <tr class="notification-item" data-type="reminder" data-id="2">
+                                                <td><input type="checkbox" class="notification-checkbox"></td>
+                                                <td><span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Reminder</span></td>
+                                                <td>Subscription Renewal</td>
+                                                <td class="text-truncate" style="max-width: 200px;">User #1234's subscription will renew in 3 days...</td>
+                                                <td>2 days ago</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary view-notification" data-id="2">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger delete-notification" data-id="2">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- System Alert Example -->
+                                            <tr class="notification-item unread" data-type="alert" data-id="3">
+                                                <td><input type="checkbox" class="notification-checkbox"></td>
+                                                <td><span class="badge bg-danger"><i class="fas fa-exclamation-triangle"></i> Alert</span></td>
+                                                <td>Server Maintenance</td>
+                                                <td class="text-truncate" style="max-width: 200px;">Scheduled maintenance tonight at 2 AM EST...</td>
+                                                <td>5 hours ago</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary view-notification" data-id="3">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger delete-notification" data-id="3">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAllNotifications">
+                                        <label class="form-check-label" for="selectAllNotifications">Select All</label>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-secondary me-2" id="markSelectedRead">
+                                            <i class="fas fa-check-circle me-1"></i> Mark Read
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" id="deleteSelected">
+                                            <i class="fas fa-trash-alt me-1"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <nav aria-label="Notifications pagination" class="p-3">
+                                    <ul class="pagination justify-content-center mb-0">
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                        </li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="#">Next</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Feedbacks & Messages View -->
+                    <div id="adminFeedbacksMessagesView" style="display: none;">
+                        <h3 class="mb-4">Messages & Feedbacks</h3>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <button class="btn btn-primary" data-toggle="modal" data-target="#sendFeedbackModal">
+                                <i class="fas fa-envelope"></i> Send New Message
+                                </button>
+                                <button class="btn btn-info ml-2" data-toggle="modal" data-target="#bulkMessageModal">
+                                    <i class="fas fa-users"></i> Send Bulk Message
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Search messages..." id="messageSearch">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Recent Messages</h5>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-secondary">Inbox</button>
+                                    <button class="btn btn-sm btn-outline-secondary">Sent</button>
+                                    <button class="btn btn-sm btn-outline-secondary">Unread</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th width="40px"><input type="checkbox"></th>
+                                                <th>From/To</th>
+                                                <th>Subject</th>
+                                                <th>Message</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="unread">
+                                                <td><input type="checkbox"></td>
+                                                <td>John Doe</td>
+                                                <td>Question about my order</td>
+                                                <td class="text-truncate" style="max-width: 200px;">Hi, I have a question about the order I placed last week...</td>
+                                                <td>2 hours ago</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary view-message" data-id="1">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox"></td>
+                                                <td>Sarah Smith</td>
+                                                <td>Account issue</td>
+                                                <td class="text-truncate" style="max-width: 200px;">I'm having trouble accessing my account...</td>
+                                                <td>1 day ago</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary view-message" data-id="2">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr class="unread">
+                                                <td><input type="checkbox"></td>
+                                                <td>Admin (You)</td>
+                                                <td>Weekly newsletter</td>
+                                                <td class="text-truncate" style="max-width: 200px;">Check out our latest products and offers...</td>
+                                                <td>3 days ago</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary view-message" data-id="3">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <nav aria-label="Message pagination">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                        </li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="#">Next</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Activity Logs View -->
+                    <div id="adminActivityLogsView" style="display: none;">
+                        <h3 class="mb-4">Activity Logs</h3>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Recent Activity</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Action</th>
+                                                <th>Service</th>
+                                                <th>Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminRecentActivity">
+                                            <!-- Filled by JavaScript -->
+                                           <!-- <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="https://via.placeholder.com/40" class="user-avatar me-2">
+                                                        <span>John Doe</span>
+                                                    </div>
+                                                </td>
+                                                <td>New Subscription</td>
+                                                <td>Netflix</td>
+                                                <td>2 hours ago</td>
+                                            </tr> --> 
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Admin Reports View -->
+                    <div id="adminReportsView" style="display: none;">
+                        <h3 class="mb-4">Reports & Analytics</h3>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Generate Report</h5>
+                                    <div>
+                                        <button class="btn btn-sm btn-primary">
+                                            <i class="fas fa-download me-1"></i> Export Report
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form id="reportForm">
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Report Type</label>
+                                            <select class="form-select" id="reportType">
+                                                <option value="revenue">Revenue Report</option>
+                                                <option value="subscriptions">Subscriptions Report</option>
+                                                <option value="users">User Growth</option>
+                                                <option value="services">Service Usage</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Start Date</label>
+                                            <input type="date" class="form-control" id="startDate">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">End Date</label>
+                                            <input type="date" class="form-control" id="endDate">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Revenue Report</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="reportChart" height="400"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Settings View -->
+                    <div id="adminSettingsView" style="display: none;">
+                        <h3 class="mb-4">StreaMate Settings</h3>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="list-group" id="settingsTabs">
+                                    <a href="#generalSettings" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+                                        <i class="fas fa-cog me-2"></i>General
+                                    </a>
+                                    <a href="#paymentSettings" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                        <i class="fas fa-credit-card me-2"></i>Payments
+                                    </a>
+                                    <a href="#streamingSettings" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                        <i class="fas fa-video me-2"></i>Streaming
+                                    </a>
+                                    <a href="#securitySettings" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                        <i class="fas fa-shield-alt me-2"></i>Security
+                                    </a>
+                                    <a href="#notificationSettings" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                        <i class="fas fa-bell me-2"></i>Notifications
+                                    </a>
+                                    <a href="#maintenanceSettings" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                        <i class="fas fa-tools me-2"></i>Maintenance
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-9">
+                                <div class="tab-content">
+                                    <!-- General Settings Tab -->
+                                    <div class="tab-pane fade show active" id="generalSettings">
+                                        <div class="card">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">General Settings</h5>
+                                                <button class="btn btn-sm btn-primary" id="saveGeneralSettings">
+                                                    <i class="fas fa-save me-1"></i> Save
+                                                </button>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="generalSettingsForm">
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Site Name</label>
+                                                            <input type="text" class="form-control" name="site_name" value="StreaMate">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Site URL</label>
+                                                            <input type="url" class="form-control" name="site_url" value="https://streamate.com">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Admin Email</label>
+                                                            <input type="email" class="form-control" name="admin_email" value="admin@streamate.com">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Support Email</label>
+                                                            <input type="email" class="form-control" name="support_email" value="support@streamate.com">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Default Timezone</label>
+                                                            <select class="form-select" name="timezone">
+                                                                <option value="America/Port-au-Prince" selected>Port-au-Prince (GMT-5)</option>
+                                                                <option value="America/New_York">New York (GMT-5/-4)</option>
+                                                                <option value="UTC">UTC</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Default Currency</label>
+                                                            <select class="form-select" name="currency">
+                                                                <option value="USD">USD ($)</option>
+                                                                <option value="HTG" selected>HTG (G)</option>
+                                                                <option value="EUR">EUR (€)</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Site Description</label>
+                                                        <textarea class="form-control" name="site_description" rows="3">The premier streaming platform for Haitian content creators</textarea>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Site Logo</label>
+                                                        <input type="file" class="form-control" name="site_logo" accept="image/*">
+                                                        <small class="text-muted">Recommended size: 200x50 pixels</small>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3 form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" id="maintenanceMode" name="maintenance_mode">
+                                                        <label class="form-check-label" for="maintenanceMode">Maintenance Mode</label>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Payment Settings Tab -->
+                                    <div class="tab-pane fade" id="paymentSettings">
+                                        <div class="card">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Payment Settings</h5>
+                                                <button class="btn btn-sm btn-primary" id="savePaymentSettings">
+                                                    <i class="fas fa-save me-1"></i> Save
+                                                </button>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="paymentSettingsForm">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Payment Gateway</label>
+                                                        <select class="form-select" name="payment_gateway">
+                                                            <option value="stripe">Stripe</option>
+                                                            <option value="paypal">PayPal</option>
+                                                            <option value="local" selected>Local Payment</option>
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Streamer Payout Percentage</label>
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control" name="payout_percentage" value="70" min="0" max="100">
+                                                                <span class="input-group-text">%</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Minimum Payout Amount</label>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">$</span>
+                                                                <input type="number" class="form-control" name="min_payout" value="50" min="0">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Payout Schedule</label>
+                                                        <select class="form-select" name="payout_schedule">
+                                                            <option value="weekly">Weekly</option>
+                                                            <option value="biweekly" selected>Bi-Weekly</option>
+                                                            <option value="monthly">Monthly</option>
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <h6 class="mt-4 mb-3">Stripe Settings</h6>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Stripe Publishable Key</label>
+                                                            <input type="text" class="form-control" name="stripe_key" placeholder="pk_test_...">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Stripe Secret Key</label>
+                                                            <input type="password" class="form-control" name="stripe_secret" placeholder="sk_test_...">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <h6 class="mt-4 mb-3">Local Payment Settings</h6>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Bank Account Details</label>
+                                                        <textarea class="form-control" name="bank_details" rows="3">Bank: Unibank
+                    Account Name: StreaMate Ltd
+                    Account Number: 1234567890
+                    Routing Number: 987654321</textarea>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Streaming Settings Tab -->
+                                    <div class="tab-pane fade" id="streamingSettings">
+                                        <div class="card">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Streaming Settings</h5>
+                                                <button class="btn btn-sm btn-primary" id="saveStreamingSettings">
+                                                    <i class="fas fa-save me-1"></i> Save
+                                                </button>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="streamingSettingsForm">
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Default Stream Quality</label>
+                                                            <select class="form-select" name="default_quality">
+                                                                <option value="360p">360p</option>
+                                                                <option value="480p">480p</option>
+                                                                <option value="720p" selected>720p</option>
+                                                                <option value="1080p">1080p</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Maximum Concurrent Streams</label>
+                                                            <input type="number" class="form-control" name="max_streams" value="3" min="1">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Streaming Server URL</label>
+                                                        <input type="url" class="form-control" name="stream_server" value="rtmp://stream.streamate.com/live">
+                                                    </div>
+                                                    
+                                                    <div class="mb-3 form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" id="allowRecording" name="allow_recording" checked>
+                                                        <label class="form-check-label" for="allowRecording">Allow Stream Recording</label>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3 form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" id="autoArchive" name="auto_archive" checked>
+                                                        <label class="form-check-label" for="autoArchive">Auto-archive Streams</label>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Archive Retention Period</label>
+                                                        <select class="form-select" name="archive_retention">
+                                                            <option value="7">7 days</option>
+                                                            <option value="30" selected>30 days</option>
+                                                            <option value="90">90 days</option>
+                                                            <option value="0">Forever</option>
+                                                        </select>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Security Settings Tab -->
+                                    <div class="tab-pane fade" id="securitySettings">
+                                        <div class="card">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Security Settings</h5>
+                                                <button class="btn btn-sm btn-primary" id="saveSecuritySettings">
+                                                    <i class="fas fa-save me-1"></i> Save
+                                                </button>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="securitySettingsForm">
+                                                    <div class="mb-3 form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" id="forceHttps" name="force_https" checked>
+                                                        <label class="form-check-label" for="forceHttps">Force HTTPS</label>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3 form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" id="twoFactorAuth" name="two_factor_auth">
+                                                        <label class="form-check-label" for="twoFactorAuth">Require Two-Factor Authentication for Admins</label>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Password Policy</label>
+                                                        <select class="form-select" name="password_policy">
+                                                            <option value="low">Low (6+ characters)</option>
+                                                            <option value="medium" selected>Medium (8+ chars with mix)</option>
+                                                            <option value="high">High (12+ chars with special)</option>
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Failed Login Attempts Before Lockout</label>
+                                                        <input type="number" class="form-control" name="login_attempts" value="5" min="1">
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Account Lockout Duration (minutes)</label>
+                                                        <input type="number" class="form-control" name="lockout_duration" value="30" min="1">
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Allowed IP Addresses (one per line)</label>
+                                                        <textarea class="form-control" name="allowed_ips" rows="3" placeholder="Leave empty to allow all IPs"></textarea>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Notification Settings Tab -->
+                                    <div class="tab-pane fade" id="notificationSettings">
+                                        <div class="card">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Notification Settings</h5>
+                                                <button class="btn btn-sm btn-primary" id="saveNotificationSettings">
+                                                    <i class="fas fa-save me-1"></i> Save
+                                                </button>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="notificationSettingsForm">
+                                                    <h6 class="mb-3">Email Notifications</h6>
+                                                    <div class="mb-3 form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" id="emailNotifications" name="email_notifications" checked>
+                                                        <label class="form-check-label" for="emailNotifications">Enable Email Notifications</label>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">SMTP Host</label>
+                                                        <input type="text" class="form-control" name="smtp_host" value="smtp.streamate.com">
+                                                    </div>
+                                                    
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">SMTP Port</label>
+                                                            <input type="number" class="form-control" name="smtp_port" value="587">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">SMTP Encryption</label>
+                                                            <select class="form-select" name="smtp_encryption">
+                                                                <option value="tls" selected>TLS</option>
+                                                                <option value="ssl">SSL</option>
+                                                                <option value="none">None</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">SMTP Username</label>
+                                                            <input type="text" class="form-control" name="smtp_username" value="noreply@streamate.com">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">SMTP Password</label>
+                                                            <input type="password" class="form-control" name="smtp_password">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <h6 class="mt-4 mb-3">Push Notifications</h6>
+                                                    <div class="mb-3 form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" id="pushNotifications" name="push_notifications" checked>
+                                                        <label class="form-check-label" for="pushNotifications">Enable Push Notifications</label>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Firebase Server Key</label>
+                                                        <input type="password" class="form-control" name="firebase_key" placeholder="AAAA...">
+                                                    </div>
+                                                    
+                                                    <h6 class="mt-4 mb-3">Notification Triggers</h6>
+                                                    <div class="mb-3 form-check">
+                                                        <input type="checkbox" class="form-check-input" id="notifyNewUser" name="notify_new_user" checked>
+                                                        <label class="form-check-label" for="notifyNewUser">New User Registration</label>
+                                                    </div>
+                                                    <div class="mb-3 form-check">
+                                                        <input type="checkbox" class="form-check-input" id="notifyNewStream" name="notify_new_stream" checked>
+                                                        <label class="form-check-label" for="notifyNewStream">New Stream Started</label>
+                                                    </div>
+                                                    <div class="mb-3 form-check">
+                                                        <input type="checkbox" class="form-check-input" id="notifyPayment" name="notify_payment" checked>
+                                                        <label class="form-check-label" for="notifyPayment">Payment Received</label>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Maintenance Settings Tab -->
+                                    <div class="tab-pane fade" id="maintenanceSettings">
+                                        <div class="card">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Maintenance Settings</h5>
+                                                <button class="btn btn-sm btn-primary" id="saveMaintenanceSettings">
+                                                    <i class="fas fa-save me-1"></i> Save
+                                                </button>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="maintenanceSettingsForm">
+                                                    <div class="mb-3 form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" id="enableMaintenance" name="maintenance_mode">
+                                                        <label class="form-check-label" for="enableMaintenance">Enable Maintenance Mode</label>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Maintenance Message</label>
+                                                        <textarea class="form-control" name="maintenance_message" rows="3">We're currently performing scheduled maintenance. The site will be back online shortly. Thank you for your patience.</textarea>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Allowed IPs During Maintenance</label>
+                                                        <textarea class="form-control" name="maintenance_ips" rows="3" placeholder="Enter one IP per line to allow access during maintenance"></textarea>
+                                                        <small class="text-muted">Your current IP: 192.168.1.1</small>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Maintenance Page Background</label>
+                                                        <input type="file" class="form-control" name="maintenance_bg" accept="image/*">
+                                                    </div>
+                                                    
+                                                    <h6 class="mt-4 mb-3">Database Maintenance</h6>
+                                                    <div class="mb-3">
+                                                        <button type="button" class="btn btn-outline-secondary me-2" id="backupDb">
+                                                            <i class="fas fa-database me-1"></i> Backup Database
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-secondary" id="optimizeDb">
+                                                            <i class="fas fa-tachometer-alt me-1"></i> Optimize Database
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <div class="alert alert-warning">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        <strong>Warning:</strong> These actions may affect site performance. Perform during low-traffic periods.
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Add User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="editUserName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editUserEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" id="editUserRole">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" form="editUserForm">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Read Notification/Reminders Modal -->
+<div class="modal fade" id="readNotificationModal" tabindex="-1" aria-labelledby="readNotificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Notification/Reminder Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="notificationContent">Loading...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Details Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalTitle">Notification Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="badge" id="notificationTypeBadge">
+                            <i class="fas fa-bell"></i> Notification
+                        </span>
+                    </div>
+                    <div class="text-muted" id="notificationDate">Just Now</div>
+                </div>
+                
+                <h4 id="notificationTitle">New Service Added: HBO Max</h4>
+                
+                <div class="notification-content border-top pt-3 mt-3" id="notificationContent">
+                    <p>We're excited to announce that HBO Max has been added to our streaming services lineup. This addition includes:</p>
+                    <ul>
+                        <li>Access to all HBO original content</li>
+                        <li>Warner Bros. movie releases</li>
+                        <li>DC Universe shows and movies</li>
+                        <li>Cartoon Network classics</li>
+                    </ul>
+                    <p>The service will be available to all premium subscribers starting tomorrow.</p>
+                </div>
+                
+                <div class="notification-meta border-top pt-3 mt-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Created By:</strong> <span id="notificationCreator">System Admin</span></p>
+                            <p class="mb-1"><strong>Priority:</strong> <span id="notificationPriority">High</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Related To:</strong> <span id="notificationRelated">Services</span></p>
+                            <p class="mb-1"><strong>Status:</strong> <span id="notificationStatus">Unread</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="notification-actions border-top pt-3 mt-3" id="notificationActions">
+                    <button class="btn btn-primary me-2" id="notificationReplyBtn" style="display: none;">
+                        <i class="fas fa-reply me-1"></i> Reply
+                    </button>
+                    <button class="btn btn-success me-2" id="notificationResolveBtn">
+                        <i class="fas fa-check-circle me-1"></i> Mark as Resolved
+                    </button>
+                    <button class="btn btn-outline-secondary" id="notificationForwardBtn" style="display: none;">
+                        <i class="fas fa-share me-1"></i> Forward
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Read Messages/Feedbacks Modal -->
+<div class="modal fade" id="readMessageModal" tabindex="-1" aria-labelledby="readMessageModalLabel" aria-hidden="true"  >
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Message/Feedback Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="messageContent">Loading...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Send Message Modal -->
+<div class="modal fade" id="sendMessageModal" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sendMessageModalLabel">Send New Message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="messageForm">
+                    <div class="form-group">
+                        <label for="recipient">Recipient</label>
+                        <select class="form-control select2" id="recipient" multiple="multiple">
+                            <option value="1">John Doe</option>
+                            <option value="2">Sarah Smith</option>
+                            <option value="3">Mike Johnson</option>
+                            <option value="4">Emily Davis</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="messageSubject">Subject</label>
+                        <input type="text" class="form-control" id="messageSubject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="messageContent">Message</label>
+                        <textarea class="form-control" id="messageContent" rows="8" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="sendMessageBtn">Send Message</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Message Modal -->
+<div class="modal fade" id="bulkMessageModal" tabindex="-1" role="dialog" aria-labelledby="bulkMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkMessageModalLabel">Send Bulk Message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="bulkMessageForm">
+                    <div class="form-group">
+                        <label>Recipient Group</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="recipientGroup" id="allUsers" value="all" checked>
+                            <label class="form-check-label" for="allUsers">
+                                All Users
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="recipientGroup" id="activeUsers" value="active">
+                            <label class="form-check-label" for="activeUsers">
+                                Active Users (logged in last 30 days)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="recipientGroup" id="premiumUsers" value="premium">
+                            <label class="form-check-label" for="premiumUsers">
+                                Premium Members
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bulkMessageSubject">Subject</label>
+                        <input type="text" class="form-control" id="bulkMessageSubject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bulkMessageContent">Message</label>
+                        <textarea class="form-control" id="bulkMessageContent" rows="8" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="sendBulkMessageBtn">Send Bulk Message</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Message Modal -->
+<div class="modal fade" id="viewMessageModal" tabindex="-1" role="dialog" aria-labelledby="viewMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewMessageModalLabel">Message Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="message-header mb-4">
+                    <h6 id="messageModalSubject">Question about my order</h6>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>From:</strong> <span id="messageModalFrom">John Doe</span><br>
+                            <strong>To:</strong> <span id="messageModalTo">Admin</span>
+                        </div>
+                        <div class="text-muted" id="messageModalDate">2 hours ago</div>
+                    </div>
+                </div>
+                <div class="message-content p-3 border rounded mb-4" id="messageModalContent">
+                    Hi, I have a question about the order I placed last week. The tracking information hasn't updated in 5 days and I'm concerned about the delivery status. Could you please check on this for me?
+                    
+                    <br><br>
+                    Order #: 12345<br>
+                    Date: 2023-05-15
+                </div>
+                
+                <div class="replies mb-4">
+                    <h6>Replies</h6>
+                    <div class="reply p-3 bg-light border rounded mb-2">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>Admin</strong>
+                            <small class="text-muted">1 hour ago</small>
+                        </div>
+                        <p>Hi John, I've checked your order and it's currently in transit. The tracking should update within the next 24 hours.</p>
+                    </div>
+                </div>
+                
+                <form id="replyMessageForm">
+                    <div class="form-group">
+                        <label for="replyContent">Reply</label>
+                        <textarea class="form-control" id="replyContent" rows="4" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="sendReplyBtn">Send Reply</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Read News & Tips Modal -->
+<div class="modal fade" id="readNewsModal" tabindex="-1" aria-labelledby="readNewsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">News & Tips Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="newsContent">Loading...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Subscription Modal -->
+<div class="modal fade" id="addSubscriptionModal" tabindex="-1" aria-labelledby="addSubscriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Subscription</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSubscriptionForm">
+                    <div class="mb-3">
+                        <label class="form-label">User</label>
+                        <select class="form-select">
+                            <option value="user">John Doe</option>
+                            <option value="user2">Jane Smith</option>
+                            <option value="user3">Alice Johnson</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Service</label>
+                        <select class="form-select">
+                            <option value="service">Netflix</option>
+                            <option value="service">Disney</option>
+                            <option value="service">Prime Video</option>
+                            <option value="service">Spotify</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Plan</label>
+                        <select class="form-select">
+                            <option value="plan">Basic</option>
+                            <option value="plan">Premium</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Add Subscription</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Profile Modal -->
+<div class="modal fade" id="addProfileModal" tabindex="-1" aria-labelledby="addProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProfileForm">
+                    <div class="mb-3">
+                        <label class="form-label">Service</label>
+                        <select class="form-select" required>
+                            <option value="">Select Service</option>
+                            <option value="netflix">Netflix</option>
+                            <option value="disney">Disney+</option>
+                            <option value="prime">Prime Video</option>
+                            <option value="spotify">Spotify</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Profile Name</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Profile Details</label>
+                        <textarea class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Add Profile</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Send Reminders Modal -->
+<div class="modal fade" id="sendRemindersModal" tabindex="-1" aria-labelledby="sendRemindersModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Renewal Reminders</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>You are about to send renewal reminders to all users with subscriptions expiring in the next 7 days.</p>
+                <div class="mb-3">
+                    <label class="form-label">Custom Message (optional)</label>
+                    <textarea class="form-control" rows="3" placeholder="Add a custom message to include in the reminder..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Send Reminders</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add News & Tips Modal -->
+<div class="modal fade" id="addNewsModal" tabindex="-1" aria-labelledby="addNewsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add News & Tips</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProfileForm">
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" required>
+                            <option value="">Select Service</option>
+                            <option value="netflix">Netflix</option>
+                            <option value="disney">Disney+</option>
+                            <option value="prime">Prime Video</option>
+                            <option value="spotify">Spotify</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Content</label>
+                        <textarea class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Add News & Tips</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="app.js"></script>
+<script src="scripts/main.js"></script>
+<script>
+</script>
+</body>
+</html>

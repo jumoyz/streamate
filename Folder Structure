@@ -1,0 +1,18 @@
+StreaMate is a mobile app that streamlines the management of streaming service subscriptions 
+by centralizing profiles, payments, and user accounts. 
+Tailored for a streaming resale business, it allows users to share Netflix, Prime Video, Disney+, 
+and Spotify accounts efficiently. StreaMate offers seamless subscription tracking, 
+AI-powered recommendations, renewal notifications, and secure payment options. 
+Designed for both customers and admins, it enhances convenience and profitability.
+
+strea-mate/
+├── icons/
+├── images/
+├── api.php
+├── app.css
+├── app.js
+├── config.php
+├── index.html
+├── manifest.json
+├── sw.js
+└── README.md

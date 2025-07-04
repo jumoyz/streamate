@@ -1,0 +1,5 @@
+# Environment variables - do not commit
+.env
+
+# Composer dependencies
+/vendor/

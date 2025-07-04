@@ -1,0 +1,321 @@
+:root {
+    --primary-color: #6c5ce7;
+    --secondary-color: #a29bfe;
+    --accent-color: #fd79a8;
+    --dark-color: #2d3436;
+    --light-color: #f5f6fa;
+    --success-color: #00b894;
+    --warning-color: #fdcb6e;
+    --danger-color: #d63031;
+}
+      
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: var(--dark-color);
+    max-width: 100%;
+    overflow-x: hidden;
+}
+        
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary-color) !important;
+}
+        
+.nav-link {
+    color: var(--dark-color) !important;
+    font-weight: 500;
+}
+        
+        .nav-link.active {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #5649c0;
+            border-color: #5649c0;
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+        }
+        
+        .service-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            animation: fadeOut 1s ease-in-out 2s forwards;
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+        
+        .splash-logo {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .splash-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .auth-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(108, 92, 231, 0.25);
+        }
+        
+        .subscription-badge {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 50px;
+        }
+        
+        .badge-active {
+            background-color: var(--success-color);
+        }
+        
+        .badge-expired {
+            background-color: var(--danger-color);
+        }
+        
+        .badge-pending {
+            background-color: var(--warning-color);
+            color: var(--dark-color);
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--secondary-color);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.6rem;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .service-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: scale(1.03);
+        }
+        
+        .netflix-card {
+            background: linear-gradient(135deg, #e50914, #b00710);
+            color: white;
+        }
+        
+        .disney-card {
+            background: linear-gradient(135deg, #113ccf, #0b1d8f);
+            color: white;
+        }
+        
+        .prime-card {
+            background: linear-gradient(135deg, #00a8e1, #007eb0);
+            color: white;
+        }
+        
+        .spotify-card {
+            background: linear-gradient(135deg, #1db954, #1aa34a);
+            color: white;
+        }
+        
+        .plan-card {
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .plan-card:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .plan-card.featured {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .payment-method {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(108, 92, 231, 0.05);
+        }
+        
+        .payment-method.active {
+            border-color: var(--primary-color);
+            background-color: rgba(108, 92, 231, 0.1);
+        }
+        
+        .admin-sidebar {
+            min-height: 100vh;
+            background-color: var(--dark-color);
+            color: white;
+        }
+        
+        .admin-sidebar .nav-link {
+            color: white !important;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+        }
+        
+        .admin-sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-sidebar .nav-link.active {
+            background-color: var(--primary-color);
+        }
+        
+        .stats-card {
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .stats-card.revenue {
+            border-left-color: var(--success-color);
+        }
+        
+        .stats-card.users {
+            border-left-color: var(--accent-color);
+        }
+        
+        .stats-card.subscriptions {
+            border-left-color: var(--warning-color);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+.unread {
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+.message-content {
+    white-space: pre-line;
+}
+.reply {
+    white-space: pre-line;
+}
+
+    .list-group-item.active {
+        background-color: #6c5ce7;
+        border-color: #6c5ce7;
+    }
+    
+    .form-check.form-switch .form-check-input {
+        width: 3em;
+        margin-left: -1.5em;
+    }
+    
+    .tab-content {
+        padding-left: 15px;
+    }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .auth-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .service-icon {
+                font-size: 2rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
