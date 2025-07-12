@@ -1,11 +1,16 @@
-import { renderSubscriptions, renderProfiles, showError } from './ui.js';
+/**
+ * User Functions Module
+ * Contains user profile and subscription management
+ */
 import {
+    apiRequest,
     getUserSubscriptions,
     getUserProfiles,
     createSubscription,
     updateUserProfile,
     changePassword
 } from './api.js';
+import { renderSubscriptions, renderProfiles, showError } from './ui.js';
 
 import { getCurrentUser } from './auth.js';
 
@@ -19,6 +24,33 @@ export async function loadUserData() {
 
     await loadSubscriptions(user.id);
     await loadProfiles(user.id);
+}
+
+async function loadUserData() {
+    try {
+        userName.textContent = currentUser.name;
+        document.getElementById('profileImage').src = currentUser.avatar || 'https://via.placeholder.com/150';
+        
+        // Split name into first and last if available
+        const nameParts = currentUser.name.split(' ');
+        document.getElementById('firstName').value = nameParts[0] || '';
+        document.getElementById('lastName').value = nameParts.slice(1).join(' ') || '';
+        document.getElementById('profileEmail').value = currentUser.email;
+        document.getElementById('profilePhone').value = currentUser.phone || '';
+        
+        await loadHome();
+    } catch (error) {
+        console.error('Error loading user data:', error);
+    }
+}
+
+async function loadHome() {
+    try {
+        const response = await getUserSubscriptions(currentUser.id);
+        renderSubscriptions(response.data);
+    } catch (error) {
+        console.error('Error loading home data:', error);
+    }
 }
 
 /**
@@ -153,3 +185,9 @@ function showError(message) {
     // Implement error display logic
     // Example: showToast(message, 'error');
 }
+
+export {
+    loadUserData,
+    loadHome
+    // ... other exports
+};

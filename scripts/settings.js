@@ -1,5 +1,26 @@
+/**
+ * Settings Module
+ * Handles application settings and configuration
+ */
+
 import { apiRequest } from './api.js';
 import { formatNotificationDate } from './utils.js';
+
+async function loadAdminSettings() {
+    try {
+        const response = await apiRequest('admin_get_settings');
+        if (response.success) {
+            // Populate settings form
+            document.getElementById('appName').value = response.data.app_name;
+            document.getElementById('appLogo').value = response.data.app_logo;
+            // ... other settings
+        }
+    } catch (error) {
+        console.error('Error loading settings:', error);
+    }
+}
+
+
 // Initialize the admin settings view
 $(document).ready(function() {
     // Initialize tab functionality
@@ -67,3 +88,8 @@ $(document).ready(function() {
     // Load settings when view is shown
     $('#adminSettingsView').on('show', loadSettings);
 });
+
+export {
+    loadAdminSettings
+    // ... other exports
+};

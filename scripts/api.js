@@ -1,9 +1,16 @@
+/**
+ * API Communication Module
+ * Handles all API requests and response processing
+ * Centralizes API endpoint management and error handling
+ */
 // API Helper Functions
-export async function apiRequest(endpoint, method = 'GET', data = null, params = {}) {
-    let url = `api.php?action=${endpoint}`;
+const API_BASE_URL = 'api.php';
+
+async function apiRequest(endpoint, method = 'GET', data = null, params = {}) {
+    let url = `${API_BASE_URL}?action=${endpoint}`;
     
     // Add query parameters if GET request
-    if (method === 'GET' && params && Object.keys(params).length > 0) {
+    if (method === 'GET' && params) {
         const queryParams = new URLSearchParams(params);
         url += `&${queryParams.toString()}`;
     }
@@ -21,39 +28,35 @@ export async function apiRequest(endpoint, method = 'GET', data = null, params =
 
     try {
         const response = await fetch(url, options);
-        const json = await response.json();
         if (!response.ok) {
-            //throw new Error(`HTTP error! status: ${response.status}`);
-            throw new Error(json.message || `HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        //return await response.json();
-        return json;
+        return await response.json();
     } catch (error) {
         console.error('API request failed:', error);
-        //return { success: false, message: 'Network error' };
-        throw error; // Let the caller handle the error
+        return { success: false, message: 'Network error' };
     }
 }
 
 // Auth functions
-export async function loginUser(email, password) {
+async function loginUser(email, password) {
     return await apiRequest('login', 'POST', { email, password });
 }
 
-export async function registerUser(name, email, password) {
+async function registerUser(name, email, password) {
     return await apiRequest('signup', 'POST', { name, email, password });
 }
 
 // Data fetching functions
-export async function getUserSubscriptions(userId) {
+async function getUserSubscriptions(userId) {
     return await apiRequest('get_subscriptions', 'GET', null, { user_id: userId });
 }
 
-export async function getUserProfiles(userId) {
+async function getUserProfiles(userId) {
     return await apiRequest('get_profiles', 'GET', null, { user_id: userId });
 }
 
-export async function createSubscription(userId, planId, paymentMethod, transactionId) {
+async function createSubscription(userId, planId, paymentMethod, transactionId) {
     return await apiRequest('create_subscription', 'POST', {
         user_id: userId,
         plan_id: planId,
@@ -62,14 +65,14 @@ export async function createSubscription(userId, planId, paymentMethod, transact
     });
 }
 
-export async function updateUserProfile(userId, profileData) {
+async function updateUserProfile(userId, profileData) {
     return await apiRequest('update_profile', 'POST', {
         user_id: userId,
         ...profileData
     });
 }
 
-export async function changePassword(userId, currentPassword, newPassword) {
+async function changePassword(userId, currentPassword, newPassword) {
     return await apiRequest('change_password', 'POST', {
         user_id: userId,
         current_password: currentPassword,
@@ -78,23 +81,23 @@ export async function changePassword(userId, currentPassword, newPassword) {
 }
 
 // News & Tips functions
-export async function getRecommendations(userId) {
+async function getRecommendations(userId) {
     return await apiRequest('get_recommendations', 'GET', null, { user_id: userId });
 }
 
-export async function getTips() {
+async function getTips() {
     return await apiRequest('get_tips', 'GET');
 }
 
-export async function getNews() {
+async function getNews() {
     return await apiRequest('get_news', 'GET');
 }
 
-export async function getFAQs() {
+async function getFAQs() {
     return await apiRequest('get_faqs', 'GET');
 }
 
-export async function submitFeedback(userId, name, email, subject, message) {
+async function submitFeedback(userId, name, email, subject, message) {
     return await apiRequest('submit_feedback', 'POST', {
         user_id: userId,
         name,
@@ -105,14 +108,37 @@ export async function submitFeedback(userId, name, email, subject, message) {
 }
 
 // Notification functions
-export async function getUnreadNotificationCount(userId) {
+async function getUnreadNotificationCount(userId) {
     return await apiRequest('get_unread_count', 'GET', null, { user_id: userId });
 }
 
-export async function getNotifications(userId, limit = 10) {
+async function getNotifications(userId, limit = 10) {
     return await apiRequest('get_notifications', 'GET', null, { user_id: userId, limit });
 }
 
-export async function markNotificationRead(notificationId) {
+async function markNotificationRead(notificationId) {
     return await apiRequest('mark_notification_read', 'POST', { notification_id: notificationId });
 }
+
+// ... (other API functions)
+
+export {
+    apiRequest,
+    loginUser,
+    registerUser,
+    getUserSubscriptions,
+    getUserProfiles,
+    createSubscription,
+    updateUserProfile,
+    changePassword,
+    getRecommendations,
+    getTips,
+    getNews,
+    getFAQs,
+    submitFeedback,
+    getUnreadNotificationCount,
+    getNotifications,
+    markNotificationRead
+    // Add other exports as needed
+    // ... other exports
+};

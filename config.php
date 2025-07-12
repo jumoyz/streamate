@@ -1,6 +1,6 @@
 <?php
 /**
- * Configuration file for Streamate API
+ * Configuration file for Streamate application
  * This file contains database connection settings, API keys for payment gateways,
  * and other environment-specific configurations.                                           
  */

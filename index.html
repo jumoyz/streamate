@@ -462,28 +462,57 @@
                                 <a class="nav-link active" href="#" data-view="home"><i class="fas fa-home"></i> Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#" data-view="subscriptions"><i class="fas fa-list"></i> Subscriptions</a>
+                                <a class="nav-link" href="#" id="menu-browse" data-view="browse"><i class="fas fa-search"></i> Browse</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#" data-view="profiles"><i class="fas fa-user"></i> Profiles</a>
+                                <a class="nav-link" href="#" id="menu-movies" data-view="movies"><i class="fas fa-film"></i> Movies</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" id="menu-series" data-view="series"><i class="fas fa-tv"></i> Series</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" id="menu-favorites" data-view="favorites"><i class="fas fa-heart"></i> Favorites</a>
                             </li>
                             <li class="nav-item position-relative">
                                 <a class="nav-link" href="#" data-view="newstips"><i class="fas fa-bullhorn"></i> News & Tips</a>
                             </li>
                             <li class="nav-item position-relative">
                                 <a class="nav-link" href="#" data-view="notifications">
-                                    <i class="fas fa-bell"></i>
+                                    <i class="fas fa-bell"></i> Notifications
                                     <span class="notification-badge"></span>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#" data-view="support"><i class="fas fa-question-circle"></i> </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#" data-view="profile"><i class="fas fa-cog"></i> </a>
-                            </li>
+                                <a class="nav-link" href="#" data-view="support"><i class="fas fa-question-circle"></i> Support</a>
+                            </li><!--
                             <li class="nav-item">
                                 <a class="nav-link" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                            </li> -->
+                            <!-- User Profile Dropdown -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userProfileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="images/user_avatar.png" alt="User Avatar" class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                                    <span id="userName">User</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#" data-view="profiles"><i class="fas fa-user"></i> Profiles</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#" data-view="subscriptions"><i class="fas fa-list"></i> Subscriptions</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#" data-view="profile"><i class="fas fa-cog"></i> Settings</a>
+                                    </li>
+                                    <!--
+                                    <li><a class="dropdown-item" href="#" data-view="profile"><i class="fas fa-user"></i> Profile Settings</a></li>
+                                    <li><a class="dropdown-item" href="#" data-view="subscriptions"><i class="fas fa-list"></i> My Subscriptions</a></li> -->
+                                    <li><hr class="dropdown-divider"></li><!--
+                                    <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a></li> -->
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
                     </div>
@@ -550,7 +579,51 @@
                         </div>
                     </div>
                 </div>
-                
+
+                <!-- Browse or Search View -->
+                <div id="browseView" style="display: none;">
+                    <h3 class="mb-4">Browse Movies or Series </h3>
+                    <p class="mb-4">Search for your favorite movies or series across all streaming services.</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search for movies or series">
+                        <button class="btn btn-outline-secondary" id="searchBtn" type="button"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                    <div class="row g-4" id="searchResults">
+                        <!-- Filled by JavaScript -->
+                        <!-- Populated with TMDb trending -->
+                    </div>
+                </div>
+
+                <!-- Movies View -->
+                <div id="moviesView" style="display: none;">
+                    <h3 class="mb-4">Movies</h3>
+                    <p class="mb-4">Explore our collection of movies across all streaming services.</p>
+                    <div class="row g-4" id="moviesList">
+                        <!-- Filled by JavaScript -->
+                        <!-- Populated with TMDb trending -->
+                    </div>
+                </div>
+
+                <!-- Series View -->
+                <div id="seriesView" style="display: none;">
+                    <h3 class="mb-4">Series</h3>
+                    <p class="mb-4">Discover the latest series available on your favorite streaming platforms.</p>
+                    <div class="row g-4" id="seriesList">
+                        <!-- Filled by JavaScript -->
+                        <!-- Populated with TMDb trending -->
+                    </div>
+                </div>
+
+                <!-- Favorites View -->
+                <div id="favoritesView" style="display: none;">
+                    <h3 class="mb-4">My Favorites</h3>
+                    <p class="mb-4">These are the movies and series you've saved.</p>
+                    <div class="row g-4" id="favoritesList">
+                        <!-- Filled by JavaScript -->
+                        <!-- Populated with user's favorites -->
+                    </div>
+                </div>
+
                 <!-- Subscriptions View -->
                 <div id="subscriptionsView" style="display: none;">
                     <h3 class="mb-4">Your Subscriptions</h3>
@@ -1136,14 +1209,23 @@
                             <a class="nav-link" href="#" data-view="adminPayments"><i class="fas fa-money-bill me-2"></i> Payments</a>
                         </li>
 						<li class="nav-item">
-							<a class="nav-link" href="#" data-view="adminNewsTips"><i class="fas fa-info-circle me-2"></i> News & Tips</a>
+							<a class="nav-link" href="#" data-view="adminNews"><i class="fas fa-info-circle me-2"></i> News & Tips</a>
 						</li>
                         <li class="nav-item">
-							<a class="nav-link" href="#" data-view="adminNotificationsReminders"><i class="fas fa-bell me-2"></i> Notifications</a>
+							<a class="nav-link" href="#" data-view="adminNotifications"><i class="fas fa-bell me-2"></i> Notifications</a>
 						</li>
                         <li class="nav-item">
-							<a class="nav-link" href="#" data-view="adminFeedbacksMessages"><i class="fas fa-comments me-2"></i> Messages</a>
+							<a class="nav-link" href="#" data-view="adminMessages"><i class="fas fa-comments me-2"></i> Messages</a>
 						</li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="adminStreamingAccounts"><i class="fas fa-plug me-2"></i> Streaming Accounts</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="adminServices"><i class="fas fa-plug me-2"></i> Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="adminPlans"><i class="fas fa-plug me-2"></i> Plans</a>
+                        </li>
                         <li class="nav-item">
 							<a class="nav-link" href="#" data-view="adminActivityLogs"><i class="fas fa-history me-2"></i> Activity Logs</a>
 						</li>
@@ -1565,8 +1647,8 @@
                         </div>
                     </div>
 
-                    <!-- Admin News & Tips View -->
-                    <div id="adminNewsTipsView" style="display: none;">
+                    <!-- Admin News View -->
+                    <div id="adminNewsView" style="display: none;">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h3>Latest News & Tips</h3>
                             <div>
@@ -1636,8 +1718,8 @@
                         </div>
                     </div>
 
-                    <!-- Admin Notifications & Reminders View -->
-                    <div id="adminNotificationsRemindersView" style="display: none;">
+                    <!-- Admin Notifications View -->
+                    <div id="adminNotificationsView" style="display: none;">
                         <h3 class="mb-4">Notifications & Reminders</h3>
                         
                         <div class="row mb-4">
@@ -1771,10 +1853,9 @@
                         </div>
                     </div>
 
-                    <!-- Admin Feedbacks & Messages View -->
-                    <div id="adminFeedbacksMessagesView" style="display: none;">
-                        <h3 class="mb-4">Messages & Feedbacks</h3>
-
+                    <!-- Admin Messages View -->
+                    <div id="adminMessagesView" style="display: none;">
+                        <h3 class="mb-4">Messages</h3>
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <button class="btn btn-primary" data-toggle="modal" data-target="#sendFeedbackModal">
@@ -1883,6 +1964,145 @@
                                 </nav>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Admin Streaming Accounts View -->
+                    <div id="adminStreamingAccountsView" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Streaming Accounts</h3>
+                            <p class="text-muted">Manage Streaming Account Subscriptions</p>
+                            <div>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStreamingAccountModal">
+                                    <i class="fas fa-plus me-2"></i> Add Streaming Account
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Service</th>
+                                                <th>Account Name</th>
+                                                <th>Email</th>
+                                                <th>Plan</th>
+                                                <th>Profiles</th>
+                                                <th>Extra Slots</th>
+                                                <th>Cost</th>
+                                                <th>Start</th>
+                                                <th>Renew</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="streamingAccountsList">
+                                            <!-- Filled by JavaScript -->
+                                             <tr data-id="${account.id}">
+                                                <td>Netflix</td>
+                                                <td>Netflix Account 2</td>
+                                                <td>monasaintil@gmail.com</td>
+                                                <td>Basic</td>
+                                                <td>4</td>
+                                                <td>0</td>
+                                                <td>$8.00</td>
+                                                <td>july 1, 2025</td>
+                                                <td>july 31, 2025</td>
+                                                <td>suspended</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary edit-btn">Edit</button>
+                                                    <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Services View -->
+                    <div id="adminServicesView" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Services Management</h3>
+                            <div>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                                    <i class="fas fa-plus me-2"></i> Add New Service
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Brand</th>
+                                                <th>Service Name</th>
+                                                <th>Description</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="servicesTable">
+                                            <!-- Filled by JavaScript -->
+                                             <tr data-id="${service.id}">
+                                                <td>Logo</td>
+                                                <td>Netflix</td>
+                                                <td>Description Services</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary edit-btn">Edit</button>
+                                                    <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>  
+                    </div>
+
+                    <!-- Admin Plans View -->
+                    <div id="adminPlansView" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Plans Management</h3>
+                            <div>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPlanModal">
+                                    <i class="fas fa-plus me-2"></i> Add New Plan
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Plan Name</th>
+                                                <th>Description</th>
+                                                <th>Price</th>
+                                                <th>Duration</th>
+                                                <th>Max Profiles</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="plansTable">
+                                            <!-- Filled by JavaScript -->
+                                             <tr data-id="${plan.id}">
+                                                <td>Basic</td>
+                                                <td>Standard Netflix plan</td>
+                                                <td>G500.00</td>
+                                                <td>30 Days</td>
+                                                <td>4</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary edit-btn">Edit</button>
+                                                    <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>                            
+                        </div> 
                     </div>
 
                     <!-- Admin Activity Logs View -->
@@ -2138,10 +2358,12 @@
                                                     <h6 class="mt-4 mb-3">Local Payment Settings</h6>
                                                     <div class="mb-3">
                                                         <label class="form-label">Bank Account Details</label>
-                                                        <textarea class="form-control" name="bank_details" rows="3">Bank: Unibank
-                    Account Name: StreaMate Ltd
-                    Account Number: 1234567890
-                    Routing Number: 987654321</textarea>
+                                                        <textarea class="form-control" name="bank_details" rows="3">
+                                                            Bank: Unibank
+                                                            Account Name: StreaMate Ltd
+                                                            Account Number: 1234567890
+                                                            Routing Number: 987654321
+                                                        </textarea>
                                                     </div>
                                                 </form>
                                             </div>
@@ -2467,7 +2689,7 @@
     </div>
 </div>
 
-<!-- Read Notification/Reminders Modal -->
+<!-- Read Notification Modal -->
 <div class="modal fade" id="readNotificationModal" tabindex="-1" aria-labelledby="readNotificationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -2548,12 +2770,12 @@
     </div>
 </div>
 
-<!-- Read Messages/Feedbacks Modal -->
+<!-- Read Messages Modal -->
 <div class="modal fade" id="readMessageModal" tabindex="-1" aria-labelledby="readMessageModalLabel" aria-hidden="true"  >
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Message/Feedback Details</h5>
+                <h5 class="modal-title">Message Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -2740,34 +2962,34 @@
             <div class="modal-body">
                 <form id="addSubscriptionForm">
                     <div class="mb-3">
-                        <label class="form-label">User</label>
-                        <select class="form-select">
-                            <option value="user">John Doe</option>
-                            <option value="user2">Jane Smith</option>
-                            <option value="user3">Alice Johnson</option>
+                        <label for="userSelect" class="form-label">User</label>
+                        <select class="form-select" id="userSelect" name="user_id">
+                            <option value="" disabled selected>Select user...</option>
+                            <!-- Will be populated dynamically -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Service</label>
-                        <select class="form-select">
-                            <option value="service">Netflix</option>
-                            <option value="service">Disney</option>
-                            <option value="service">Prime Video</option>
-                            <option value="service">Spotify</option>
+                        <label for="serviceSelect" class="form-label">Service</label>
+                        <select class="form-select" id="serviceSelect" name="service_id">
+                            <option value="" disabled selected>Select service...</option>
+                            <!-- Will be populated dynamically -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Plan</label>
-                        <select class="form-select">
-                            <option value="plan">Basic</option>
-                            <option value="plan">Premium</option>
+                        <label for="planSelect" class="form-label">Plan</label>
+                        <select class="form-select" id="planSelect" name="plan_id">
+                            <option value="" disabled selected>Select plan...</option>
+                            <!-- Will be populated dynamically -->
                         </select>
                     </div>
                 </form>
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i> Subscription will be active immediately after creation.
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Add Subscription</button>
+                <button type="button" class="btn btn-primary" id="saveSubscriptionBtn">Add Subscription</button>
             </div>
         </div>
     </div>
@@ -2872,12 +3094,217 @@
     </div>
 </div>
 
+<!-- Add Streaming Account Modal -->
+<div class="modal fade" id="addStreamingAccountModal" tabindex="-1" aria-labelledby="addStreamingAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog"><!--
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Streaming Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addStreamingAccountForm">
+                    <div class="mb-3">
+                        <label class="form-label">Services</label>
+                        <select class="form-select" name="service" required>
+                            <option value="">Select Service</option>
+                            <option value="streaming">Netflix</option>
+                            <option value="streaming">Disney+</option>
+                            <option value="streaming">Prime Video</option>
+                            <option value="streaming">Hulu</option>
+                            <option value="streaming">HBO Max</option>
+                            <option value="music">Apple Music</option>
+                            <option value="music">YouTube Music</option>
+                            <option value="music">Spotify</option>
+                            <option value="gaming">Twitch</option>
+                        </select>                        
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Account Name</label>
+                        <input type="text" class="form-control" name="account_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Plan</label>
+                        <input type="text" class="form-control" name="plan" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Profiles</label>
+                        <select class="form-select" name="profiles" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Extra Slots</label>
+                        <select class="form-select" name="extra_slots" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cost</label>
+                        <input type="text" class="form-control" name="cost" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-control" name="start_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Renewal Date</label>
+                        <input type="date" class="form-control" name="renewal_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                         <select class="form-select" name="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">On hold</option>
+                            <option value="pending">Suspended</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="expired">Expired</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="addStreamingAccountButton">Add Streaming Account</button>
+            </div>
+        </div> -->
+    
+        <form id="addStreamingAccountForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title">Add Streaming Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                <input name="service_name" class="form-control mb-2" placeholder="Service (e.g., Netflix)" required>
+                <input name="account_name" class="form-control mb-2" placeholder="Account Name" required>
+                <input name="email" class="form-control mb-2" type="email" placeholder="Email" required>
+                <input name="plan" class="form-control mb-2" placeholder="Plan">
+                <input name="profile_count" class="form-control mb-2" type="number" placeholder="Number of Profiles">
+                <input name="extra_members" class="form-control mb-2" type="number" placeholder="Extra Members">
+                <input name="cost" class="form-control mb-2" type="number" step="0.01" placeholder="Cost">
+                <input name="start_date" class="form-control mb-2" type="date">
+                <input name="renew_date" class="form-control mb-2" type="date">
+                <select name="status" class="form-control mb-2">
+                    <option value="active">Active</option>
+                    <option value="on-hold">On-hold</option>
+                    <option value="suspended">Suspended</option>
+                    <option value="cancel">Cancel</option>
+                </select>
+                </div>
+                <div class="modal-footer">
+                <button type="submit" class="btn btn-primary btn-success" id="addStreamingAccountButton">Add Streaming Account</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<!-- Edit Streaming Account Modal -->
+<div class="modal fade" id="editStreamingAccountModal" tabindex="-1" aria-labelledby="editStreamingAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Streaming Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editStreamingAccountForm">
+                    <input type="hidden" id="editStreamingAccountId">
+                    <div class="mb-3">
+                        <label class="form-label">Service</label>
+                        <input type="text" class="form-control" id="editStreamingAccountService" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Account Name</label>
+                        <input type="text" class="form-control" id="editStreamingAccountName" required>
+                    </div>  
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editStreamingAccountEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Plan</label>
+                        <input type="text" class="form-control" id="editStreamingAccountPlan" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Profiles</label>
+                        <input type="number" class="form-control" id="editStreamingAccountProfiles" required>
+                    </div>  
+                    <div class="mb-3">
+                        <label class="form-label">Extra Slots</label>
+                        <input type="number" class="form-control" id="editStreamingAccountExtraSlots" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cost</label>
+                        <input type="number" class="form-control" id="editStreamingAccountCost" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="editStreamingAccountStartDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Renewal Date</label>
+                        <input type="date" class="form-control" id="editStreamingAccountRenewalDate" required>  
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" id="editStreamingAccountStatus" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">on Hold</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="expired">Expired</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" form="editStreamingAccountForm">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
+
+</div>
+
+<!-- Edit Service Modal -->
+<div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel" aria-hidden="true">
+
+</div>
+
+<!-- Add Plan Modal -->
+<div class="modal fade" id="addPlantModal" tabindex="-1" aria-labelledby="addPlanModalLabel" aria-hidden="true">
+
+</div>
+
+<!-- Edit Plan Modal -->
+<div class="modal fade" id="editPlantModal" tabindex="-1" aria-labelledby="editPlanModalLabel" aria-hidden="true">
+
+</div>
+
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="app.js"></script>
-<script src="scripts/main.js"></script>
-<script>
-</script>
+<script src="api/watchmode.js"></script>
 </body>
 </html>

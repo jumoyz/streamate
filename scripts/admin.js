@@ -1,5 +1,10 @@
+/**
+ * Admin Functions Module
+ * Contains all admin-specific functionality
+ */
 import { renderAdminUsers, renderAdminSubscriptions, renderAdminProfiles, renderAdminPayments, showError } from './ui.js';
 import {
+    apiRequest,
     getUserSubscriptions,
     getUserProfiles,
     getUser,
@@ -13,6 +18,31 @@ import {
 
 import { getCurrentUser } from './auth.js';
 
+async function getAdminUsers() {
+    return await apiRequest('admin_get_users');
+}
+
+async function getAdminSubscriptions() {
+    return await apiRequest('admin_get_subscriptions');
+}
+
+async function loadAdminDashboard() {
+    try {
+        const [users, subs, payments] = await Promise.all([
+            getAdminUsers(),
+            getAdminSubscriptions(),
+            apiRequest('admin_get_payments')
+        ]);
+        
+        renderDashboardStats({
+            totalUsers: users.data.length,
+            activeSubs: subs.data.filter(s => s.status === 'active').length,
+            monthlyRevenue: payments.data.reduce((sum, p) => sum + p.amount, 0)
+        });
+    } catch (error) {
+        console.error('Error loading admin dashboard:', error);
+    }
+}
 /**
  * Loads the admin dashboard data (users, subscriptions, profiles, payments).
  * Requires the current user to be an admin.
@@ -160,3 +190,10 @@ function showError(message) {
     // Implement error display logic
     // Example: showToast(message, 'error');
 }
+
+export {
+    getAdminUsers,
+    getAdminSubscriptions,
+    loadAdminDashboard
+    // ... other exports
+};

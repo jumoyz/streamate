@@ -1,8 +1,45 @@
+/**
+ * UI Rendering Module
+ * Contains all functions responsible for rendering UI components
+ * Separates view logic from business logic
+ */
+
 export async function renderRecommendations(recommendations) {
     // ...move your renderRecommendations code here...
     // Load recommendations
         const recResponse = await apiRequest('get_recommendations', 'GET', null, { user_id: currentUser.id });
         renderRecommendations(recResponse.data || []);
+}
+
+function renderRecommendations(recommendations) {
+    const container = document.getElementById('recommendationsContainer');
+    
+    if (recommendations.length === 0) {
+        container.innerHTML = `
+            <div class="alert alert-info">
+                We don't have any personalized recommendations for you yet. Check back later!
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="row g-4">
+            ${recommendations.map(rec => `
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">${rec.title}</h5>
+                            <p class="card-text">${rec.description}</p>
+                            ${rec.action_url ? `
+                                <a href="${rec.action_url}" class="btn btn-sm btn-primary">${rec.action_text || 'Learn More'}</a>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
 
 export async function renderTips(tips) {
@@ -71,3 +108,11 @@ export function showError(viewId, message) {
         container.innerHTML = `<div class="alert alert-danger">${message}</div>`;
     }
 }
+
+export {
+    renderRecommendations,
+    renderTips,
+    renderNews,
+    renderFAQs
+    // ... other exports
+};

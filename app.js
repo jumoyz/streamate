@@ -1,7 +1,17 @@
+/**
+ * API Request
+ * @param {*} endpoint 
+ * @param {*} method 
+ * @param {*} data 
+ * @param {*} params 
+ * @returns 
+ */
+// API Base URL
+const API_BASE_URL = 'api.php';
 // API Helper Functions
 async function apiRequest(endpoint, method = 'GET', data = null, params = {}) {
-    let url = `api.php?action=${endpoint}`;
-    
+    let url = `${API_BASE_URL}?action=${endpoint}`;
+
     // Add query parameters if GET request
     if (method === 'GET' && params) {
         const queryParams = new URLSearchParams(params);
@@ -30,7 +40,12 @@ async function apiRequest(endpoint, method = 'GET', data = null, params = {}) {
         return { success: false, message: 'Network error' };
     }
 }
-
+/**
+ * Auth functions
+ * @param {*} email 
+ * @param {*} password 
+ * @returns 
+ */
 // Auth functions
 async function loginUser(email, password) {
     return await apiRequest('login', 'POST', { email, password });
@@ -40,6 +55,11 @@ async function registerUser(name, email, password) {
     return await apiRequest('signup', 'POST', { name, email, password });
 }
 
+/**
+ * Data fetching functions
+ * @param {*} userId 
+ * @returns 
+ */
 // Data fetching functions
 async function getUserSubscriptions(userId) {
     return await apiRequest('get_subscriptions', 'GET', null, { user_id: userId });
@@ -423,6 +443,51 @@ async function revokeProfile(profileId) {
     });
 }
 
+async function getAdminStreamingAccounts() {
+    return await apiRequest('admin_get_streaming_accounts');
+}
+
+async function addAdminStreamingAccount(data) {
+    return await apiRequest('admin_add_streaming_account', 'POST', data);
+}
+
+async function editAdminStreamingAccount(data) {
+    return await apiRequest('admin_edit_streaming_account', 'POST', data);
+}
+
+async function deleteAdminStreamingAccount(accountId) {
+    const formData = new FormData();
+    formData.append('account_id', accountId);
+
+    const response = await fetch('api.php?action=admin_delete_streaming_account', {
+        method: 'POST',
+        body: formData
+    });
+
+    return await response.json();
+}
+
+async function getAdminServices() {
+    return await apiRequest('admin_get_services');
+}
+
+async function getAdminPlans() {
+    return await apiRequest('admin_get_plans');
+}
+
+async function getAdminActivityLogs(){
+    return await apiRequest('admin_get_activity_logs');
+}
+
+async function getAdminReports(){
+    return await apiRequest('admin_get_reports');
+}
+
+async function getAdminSettings(){
+    return await apiRequest('admin_get_settings');
+}
+
+
 // App state
 let currentUser = null;
 let isAdmin = false;
@@ -447,8 +512,18 @@ const orderSummary = document.getElementById('orderSummary');
 const confirmationDetails = document.getElementById('confirmationDetails');
 const usersTable = document.getElementById('usersTable');
 const adminSubscriptionsTable = document.getElementById('adminSubscriptionsTable');
+const adminStreamingAccountsTable = document.getElementById('adminStreamingAccountsTable');
+const adminServicesTable = document.getElementById('adminServicesTable');
+const adminPlansTable = document.getElementById('adminPlansTable');
+const adminActivityLogsTable = document.getElementById('adminActivityLogsTable');
+const adminReportsTable = document.getElementById('adminReportsTable');
+const adminSettingsTable = document.getElementById('adminSettingsTable');
 const profilesTable = document.getElementById('profilesTable');
 const paymentsTable = document.getElementById('paymentsTable');
+const newsTipsContainer = document.getElementById('newsTipsContainer');
+const newsList = document.getElementById('newsList');
+const faqAccordion = document.getElementById('faqAccordion');
+
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
@@ -507,6 +582,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners for logout
     document.getElementById('logoutBtn')?.addEventListener('click', logout);
     document.getElementById('adminLogoutBtn')?.addEventListener('click', logout);
+
+    document.getElementById('adminStreamingAccounts')?.addEventListener('click', loadAdminStreamingAccounts);
+    document.getElementById('adminServices')?.addEventListener('click', loadAdminServices);
+    document.getElementById('adminPlans')?.addEventListener('click', loadAdminPlans);
+    document.getElementById('adminActivityLogs')?.addEventListener('click', loadAdminActivityLogs);
+    document.getElementById('adminReports')?.addEventListener('click', loadAdminReports);
+    document.getElementById('adminSettings')
 
     // Initialize charts if on admin dashboard
     if (document.getElementById('revenueChart')) {
@@ -689,6 +771,7 @@ function navigateTo(view) {
         if (view === 'adminNotificationsReminders') loadAdminNotificationsReminders();
         if (view === 'adminPayments') loadAdminPayments();
         if (view === 'adminFeedbacksMessages') loadAdminFeedbacksMessages();
+        if (view === 'adminStreamingAccounts') loadAdminStreamingAccounts();
         if (view === 'adminActivityLogs') loadAdminActivityLogs();
         if (view === 'adminReports') loadAdminReports();
         if (view === 'adminSettings') loadAdminSettings();
@@ -1535,7 +1618,6 @@ async function loadAdminDashboard() {
         console.error('Failed to load admin dashboard:', err);
     }
 }
-
 /*
 // Load admin dashboard
 async function loadAdminDashboard() {
@@ -1657,125 +1739,6 @@ async function loadAdminUsers() {
     }
 }
 
-// Add User Modal
-document.addEventListener('DOMContentLoaded', function () {
-    // Add User Modal logic
-    const addUserModal = document.getElementById('addUserModal');
-    if (!addUserModal) return;
-
-    const addUserForm = addUserModal.querySelector('#addUserForm');
-    const addUserBtn = addUserModal.querySelector('.btn-primary');
-
-    addUserBtn.addEventListener('click', async function () {
-        // Get form values
-        const name = addUserForm.querySelector('input[type="text"]').value.trim();
-        const email = addUserForm.querySelector('input[type="email"]').value.trim();
-        const password = addUserForm.querySelector('input[type="password"]').value;
-        const role = addUserForm.querySelector('select').value;
-
-        // Basic validation
-        if (!name || !email || !password || !role) {
-            alert('Please fill in all fields.');
-            return;
-        }
-
-        addUserBtn.disabled = true;
-        addUserBtn.textContent = 'Adding...';
-
-        try {
-            const response = await apiRequest('admin_add_user', 'POST', {
-                name,
-                email,
-                password,
-                role
-            });
-
-            if (response.success) {
-                alert('User added successfully!');
-                addUserForm.reset();
-                // Optionally close the modal
-                const modalInstance = bootstrap.Modal.getInstance(addUserModal);
-                if (modalInstance) modalInstance.hide();
-                // Optionally reload users table
-                if (typeof loadAdminUsers === 'function') loadAdminUsers();
-            } else {
-                alert(response.message || 'Failed to add user.');
-            }
-        } catch (error) {
-            alert('Error adding user. Please try again.');
-        } finally {
-            addUserBtn.disabled = false;
-            addUserBtn.textContent = 'Add User';
-        }
-    });
-});
-
-// Show Edit User Modal
-function showEditUserModal(userId) {
-    const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
-    const form = document.getElementById('editUserForm');
-    const userRow = document.querySelector(`tr[data-id="${userId}"]`);                      
-    document.getElementById('editUserId').value = userId;
-    document.getElementById('editUserName').value = userRow.querySelector('td:nth-child(1) span').textContent;
-    document.getElementById('editUserEmail').value = userRow.querySelector('td:nth-child(2)').textContent;
-    document.getElementById('editUserRole').value = userRow.querySelector('td:nth-child(3)').textContent.toLowerCase();
-    modal.show();
-}
-
-// Handle Edit User Form Submit
-document.getElementById('editUserForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const userId = document.getElementById('editUserId').value;
-    const name = document.getElementById('editUserName').value;
-    const email = document.getElementById('editUserEmail').value;
-    const role = document.getElementById('editUserRole').value;
-
-    const response = await apiRequest('admin_update_user', 'POST', {
-        user_id: userId,
-        name,
-        email,
-        is_admin: role === 'admin'
-    });
-
-    if (response.success) {
-        alert('User updated successfully!');
-        loadAdminUsers();
-        bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
-    } else {
-        alert(response.message || 'Failed to update user.');
-    }
-});
-
-// Delete User
-async function deleteUser(userId) {
-    if (confirm('Are you sure you want to delete this user?')) {
-        const response = await apiRequest('admin_delete_user', 'POST', { user_id: userId });
-        if (response.success) {
-            alert('User deleted successfully!');
-            loadAdminUsers();
-        } else {
-            alert(response.message || 'Failed to delete user.');
-        }
-    }
-}
-
-// User actions
-usersTable.addEventListener('click', async (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    
-    const userId = btn.closest('tr').dataset.id;
-    
-    if (btn.classList.contains('btn-edit')) {
-        showEditUserModal(userId);
-    } else if (btn.classList.contains('btn-delete')) {
-        if (confirm('Delete this user?')) {
-            await apiRequest('admin_delete_user', 'POST', { user_id: userId });
-            loadAdminUsers();
-        }
-    }
-});
-
 // Load admin subscriptions
 async function loadAdminSubscriptions() {
     try {
@@ -1887,43 +1850,6 @@ async function loadAdminSubscriptions() {
         `;
     }
 }
-
-// Admin: Send Renewal Reminders logic
-document.addEventListener('DOMContentLoaded', function () {
-    // Find the Send Reminders button in the modal footer
-    const sendRemindersModal = document.getElementById('sendRemindersModal');
-    if (!sendRemindersModal) return;
-
-    const sendBtn = sendRemindersModal.querySelector('.btn-primary');
-    const messageTextarea = sendRemindersModal.querySelector('textarea');
-
-    sendBtn.addEventListener('click', async function () {
-        sendBtn.disabled = true;
-        sendBtn.textContent = 'Sending...';
-
-        const customMessage = messageTextarea.value.trim();
-
-        try {
-            const response = await apiRequest('admin_send_renewal_reminders', 'POST', {
-                message: customMessage
-            });
-
-            if (response.success) {
-                alert('Renewal reminders sent successfully!');
-                // Optionally close the modal
-                const modalInstance = bootstrap.Modal.getInstance(sendRemindersModal);
-                if (modalInstance) modalInstance.hide();
-            } else {
-                alert(response.message || 'Failed to send reminders.');
-            }
-        } catch (error) {
-            alert('Error sending reminders. Please try again.');
-        } finally {
-            sendBtn.disabled = false;
-            sendBtn.textContent = 'Send Reminders';
-        }
-    });
-});
 
 // Load admin profiles
 async function loadAdminProfiles() {
@@ -2103,6 +2029,172 @@ async function loadAdminPayments() {
     }
 }
 
+// Load admin Streaming Accounts
+async function loadStreamingAccounts() {
+    try {
+        const response = await getAdminStreamingAccounts();
+
+        if (response.success) {
+            const streamingAccountsList = document.getElementById('streamingAccountsList');
+            streamingAccountsList.innerHTML = '';
+
+            if (response.data.length === 0) {
+                streamingAccountsList.innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center">
+                        No accounts found.
+                    </td>
+                </tr>`;
+                return;
+            }
+
+            response.data.forEach(account => {
+                streamingAccountsList.innerHTML += `
+                    <tr data-id="${account.id}">
+                        <td>${account.service_name}</td>
+                        <td>${account.account_name}</td>
+                        <td>${account.email}</td>
+                        <td>${account.plan}</td>
+                        <td>${account.profile_count}</td>
+                        <td>${account.extra_members}</td>
+                        <td>$${account.cost}</td>
+                        <td>${new Date(account.start_date).toLocaleDateString()}</td>
+                        <td>${new Date(account.renew_date).toLocaleDateString()}</td>
+                        <td>${account.status}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-btn">Edit</button>
+                            <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            document.getElementById('streamingAccountsList').innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center text-danger">
+                    Error loading streaming accounts.</td>
+                </tr>`;
+        }
+    } catch (error) {
+        console.error('Error loading streaming accounts:', error);
+        document.getElementById('streamingAccountsList').innerHTML = `
+            <tr>
+                <td colspan="10" class="text-center text-danger">
+                Error loading streaming accounts.</td>
+            </tr>`;
+    }
+}
+
+// Load admin services
+async function loadAdminServices() {
+    try {
+        const response = await getAdminServices();
+        const servicesTable = document.getElementById('servicesTable');
+
+        if (response.success) {
+            servicesTable.innerHTML = '';
+
+            if (response.data.length === 0) {
+                servicesTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            No services found.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                response.data.forEach(service => {
+                    servicesTable.innerHTML += `
+                        <tr>
+                            <td>${service.logo}</td>
+                            <td>${service.name}</td>
+                            <td>${service.description}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editServiceModal" data-service-id="${service.id}">Edit</button>
+                                <button class="btn btn-sm btn-outline-danger" data-service-id="${service.id}">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        } else {
+            console.error('Failed to load services:', response.message);
+            servicesTable.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-danger">
+                        Failed to load services. Please try again later.
+                    </td>
+                </tr>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading admin services:', error);
+        servicesTable.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-4 text-danger">
+                    Error loading services. Please try again.
+                </td>
+            </tr>
+        `;
+    }
+}      
+
+// Load admin plans
+async function loadAdminPlans() {
+    try {
+        const response = await getAdminPlans();
+        
+        if (response.success) {
+            plansTable.innerHTML = '';
+
+            if (response.data.length === 0) {
+                plansTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            No plans found.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                response.data.forEach(plan => {
+                    plansTable.innerHTML += `
+                        <tr>
+                            <td>${plan.name}</td>
+                            <td>${plan.description}</td>
+                            <td>$${plan.price}</td>
+                            <td>$${plan.duration_days}</td>
+                            <td>$${plan.max_prifles}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPlanModal" data-plan-id="${plan.id}">Edit</button>
+                                <button class="btn btn-sm btn-outline-danger" data-plan-id="${plan.id}">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        } else {
+            console.error('Failed to load plans:', response.message);
+            plansTable.innerHTML = `    
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-danger">
+                        Failed to load plans. Please try again later.
+                    </td>
+                </tr>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading admin plans:', error);
+        plansTable.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-4 text-danger">
+                    Error loading plans. Please try again.
+                </td>
+            </tr>
+        `;
+    }
+}     
+            
+        
 // Load admin reports
 async function loadAdminReports() {
     // Initialize report chart
@@ -2219,6 +2311,358 @@ function initReportChart() {
 }
 
 // Load Admin Settings
+async function loadAdminSettings() {
+    try {
+        const response = await getAdminSettings();
+        
+        if (response.success) {
+            const settings = response.data;
+            document.getElementById('siteName').value = settings.site_name || '';
+            document.getElementById('siteUrl').value = settings.site_url || '';
+            document.getElementById('adminEmail').value = settings.admin_email || '';
+            document.getElementById('currency').value = settings.currency || 'USD';
+            document.getElementById('timezone').value = settings.timezone || 'UTC';
+        } else {
+            console.error('Failed to load settings:', response.message);
+        }
+    } catch (error) {
+        console.error('Error loading admin settings:', error);
+    }
+}
+
+/**
+ * Admin Operations
+ * Add, Edit, Delete, and Cancel Users, Subscriptions, Profiles, Payments, 
+ * News, Notifications, Messages, Streaming Accounts, Services, Plans, Reports and Settings
+ */
+// Add User Modal
+document.addEventListener('DOMContentLoaded', function () {
+    // Add User Modal logic
+    const addUserModal = document.getElementById('addUserModal');
+    if (!addUserModal) return;
+
+    const addUserForm = addUserModal.querySelector('#addUserForm');
+    const addUserBtn = addUserModal.querySelector('.btn-primary');
+
+    addUserBtn.addEventListener('click', async function () {
+        // Get form values
+        const name = addUserForm.querySelector('input[type="text"]').value.trim();
+        const email = addUserForm.querySelector('input[type="email"]').value.trim();
+        const password = addUserForm.querySelector('input[type="password"]').value;
+        const role = addUserForm.querySelector('select').value;
+
+        // Basic validation
+        if (!name || !email || !password || !role) {
+            alert('Please fill in all fields.');
+            return;
+        }
+
+        addUserBtn.disabled = true;
+        addUserBtn.textContent = 'Adding...';
+
+        try {
+            const response = await apiRequest('admin_add_user', 'POST', {
+                name,
+                email,
+                password,
+                role
+            });
+
+            if (response.success) {
+                alert('User added successfully!');
+                addUserForm.reset();
+                // Optionally close the modal
+                const modalInstance = bootstrap.Modal.getInstance(addUserModal);
+                if (modalInstance) modalInstance.hide();
+                // Optionally reload users table
+                if (typeof loadAdminUsers === 'function') loadAdminUsers();
+            } else {
+                alert(response.message || 'Failed to add user.');
+            }
+        } catch (error) {
+            alert('Error adding user. Please try again.');
+        } finally {
+            addUserBtn.disabled = false;
+            addUserBtn.textContent = 'Add User';
+        }
+    });
+});
+
+// Show Edit User Modal
+function showEditUserModal(userId) {
+    const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+    const form = document.getElementById('editUserForm');
+    const userRow = document.querySelector(`tr[data-id="${userId}"]`);                      
+    document.getElementById('editUserId').value = userId;
+    document.getElementById('editUserName').value = userRow.querySelector('td:nth-child(1) span').textContent;
+    document.getElementById('editUserEmail').value = userRow.querySelector('td:nth-child(2)').textContent;
+    document.getElementById('editUserRole').value = userRow.querySelector('td:nth-child(3)').textContent.toLowerCase();
+    modal.show();
+}
+
+// Handle Edit User Form Submit
+document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const userId = document.getElementById('editUserId').value;
+    const name = document.getElementById('editUserName').value;
+    const email = document.getElementById('editUserEmail').value;
+    const role = document.getElementById('editUserRole').value;
+
+    const response = await apiRequest('admin_update_user', 'POST', {
+        user_id: userId,
+        name,
+        email,
+        is_admin: role === 'admin'
+    });
+
+    if (response.success) {
+        alert('User updated successfully!');
+        loadAdminUsers();
+        bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+    } else {
+        alert(response.message || 'Failed to update user.');
+    }
+});
+
+// Delete User
+async function deleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user?')) {
+        const response = await apiRequest('admin_delete_user', 'POST', { user_id: userId });
+        if (response.success) {
+            alert('User deleted successfully!');
+            loadAdminUsers();
+        } else {
+            alert(response.message || 'Failed to delete user.');
+        }
+    }
+}
+
+// User actions
+usersTable.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    
+    const userId = btn.closest('tr').dataset.id;
+    
+    if (btn.classList.contains('btn-edit')) {
+        showEditUserModal(userId);
+    } else if (btn.classList.contains('btn-delete')) {
+        if (confirm('Delete this user?')) {
+            await apiRequest('admin_delete_user', 'POST', { user_id: userId });
+            loadAdminUsers();
+        }
+    }
+});
+
+// Admin: Send Renewal Reminders logic
+document.addEventListener('DOMContentLoaded', function () {
+    // Find the Send Reminders button in the modal footer
+    const sendRemindersModal = document.getElementById('sendRemindersModal');
+    if (!sendRemindersModal) return;
+
+    const sendBtn = sendRemindersModal.querySelector('.btn-primary');
+    const messageTextarea = sendRemindersModal.querySelector('textarea');
+
+    sendBtn.addEventListener('click', async function () {
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Sending...';
+
+        const customMessage = messageTextarea.value.trim();
+
+        try {
+            const response = await apiRequest('admin_send_renewal_reminders', 'POST', {
+                message: customMessage
+            });
+
+            if (response.success) {
+                alert('Renewal reminders sent successfully!');
+                // Optionally close the modal
+                const modalInstance = bootstrap.Modal.getInstance(sendRemindersModal);
+                if (modalInstance) modalInstance.hide();
+            } else {
+                alert(response.message || 'Failed to send reminders.');
+            }
+        } catch (error) {
+            alert('Error sending reminders. Please try again.');
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send Reminders';
+        }
+    });
+});
+
+// Admin Add Subscription Modal
+document.addEventListener('DOMContentLoaded', function () {
+    const addSubscriptionModal = document.getElementById('addSubscriptionModal');
+    if (!addSubscriptionModal) return;
+
+    const addSubscriptionForm = addSubscriptionModal.querySelector('#addSubscriptionForm');
+    const addSubscriptionBtn = addSubscriptionModal.querySelector('.btn-primary');
+
+    addSubscriptionBtn.addEventListener('click', async function () {
+        addSubscriptionBtn.disabled = true;
+        addSubscriptionBtn.textContent = 'Adding...';
+
+        // Load modal data from API when shown
+        const usersResponse = await apiRequest('admin_get_users', 'GET');
+        const servicesResponse = await apiRequest('admin_get_services', 'GET');
+        const plansResponse = await apiRequest('admin_get_plans', 'GET');
+
+        if (!usersResponse.success || !servicesResponse.success || !plansResponse.success) {
+            alert('Error loading modal data. Please try again.');
+            return;
+        }
+        // Populate user select
+        const userSelect = addSubscriptionForm.querySelector('select[name="user_id"]');
+        const serviceSelect = addSubscriptionForm.querySelector('select[name="service_id"]');
+        const planSelect = addSubscriptionForm.querySelector('select[name="plan_id"]');
+
+        const userId = userSelect.value;
+        const serviceId = serviceSelect.value;
+        const planId = planSelect.value;
+
+        try {
+            const response = await apiRequest('admin_add_subscription', 'POST', {
+                user_id: userId,
+                service_id: serviceId,
+                plan_id: planId
+            });
+
+            if (response.success) {
+                alert('Subscription added successfully!');
+                addSubscriptionForm.reset();
+                // Optionally close the modal
+                const modalInstance = bootstrap.Modal.getInstance(addSubscriptionModal);
+                if (modalInstance) modalInstance.hide();
+            } else {
+                alert(response.message || 'Failed to add subscription.');
+            }
+        } catch (error) {
+            alert('Error adding subscription. Please try again.');
+        } finally {
+            addSubscriptionBtn.disabled = false;
+            addSubscriptionBtn.textContent = 'Add Subscription';
+        }
+    });
+}); 
+
+// Admin add profiles modal
+const addProfileModal = document.getElementById('addProfileModal');
+const addProfileForm = document.getElementById('addProfileForm');
+
+addProfileForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(addProfileForm).entries());
+
+    try {
+        const response = await addAdminProfile(data);
+        if (response.success) {
+            alert('Profile added successfully!');
+            addProfileForm.reset();
+            bootstrap.Modal.getInstance(addProfileModal).hide();
+            loadAdminProfiles(); // Refresh the list
+        } else {
+            alert('Failed to add profile: ' + response.message);
+        }
+    } catch (error) {
+        console.error('Error adding profile:', error);
+        alert('Failed to add profile. Please try again.');
+    }
+});
+
+// Add new streaming account
+const addStreamingAccountForm = document.getElementById('addStreamingAccountForm');
+
+addStreamingAccountForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(addStreamingAccountForm).entries());
+    data.profile_count = parseInt(data.profile_count);
+    data.extra_members = parseInt(data.extra_members);
+    data.cost = parseFloat(data.cost);
+
+    const response = await addAdminStreamingAccount(data);
+
+    if (response.success) {
+        alert('Account added!');
+        addStreamingAccountForm.reset();
+        bootstrap.Modal.getInstance(document.getElementById('addStreamingAccountModal')).hide();
+        loadStreamingAccounts();
+    } else {
+        alert('Failed to add account: ' + response.message);
+    }
+});
+
+// Open edit modal with data
+function openEditModal(account) {
+  const form = document.getElementById("editStreamingAccountForm");
+
+  for (const key in account) {
+    if (form[key]) form[key].value = account[key];
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById('editStreamingAccountModal'));
+  modal.show();
+}
+
+// Edit existing account
+function handleEditStreamingAccount(e) {
+    const row = e.target.closest('tr');
+    const id = row.dataset.id;
+
+    const modal = new bootstrap.Modal(document.getElementById('editStreamingAccountModal'));
+    const form = document.getElementById('editStreamingAccountForm');
+
+    form.account_id.value = id;
+    form.service_name.value = row.children[0].innerText;
+    form.account_name.value = row.children[1].innerText;
+    form.email.value = row.children[2].innerText;
+    form.plan.value = row.children[3].innerText;
+    form.profile_count.value = row.children[4].innerText;
+    form.extra_members.value = row.children[5].innerText;
+    form.cost.value = row.children[6].innerText.replace('$', '');
+    form.start_date.value = formatDateForInput(row.children[7].innerText);
+    form.renew_date.value = formatDateForInput(row.children[8].innerText);
+    form.status.value = row.children[9].innerText;
+
+    modal.show();
+}
+
+document.getElementById('editStreamingAccountForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(this).entries());
+    data.id = parseInt(data.account_id);
+    data.profile_count = parseInt(data.profile_count);
+    data.extra_members = parseInt(data.extra_members);
+    data.cost = parseFloat(data.cost);
+
+    const response = await editAdminStreamingAccount(data);
+    if (response.success) {
+        alert('Account updated!');
+        bootstrap.Modal.getInstance(document.getElementById('editStreamingAccountModal')).hide();
+        loadStreamingAccounts();
+    } else {
+        alert('Failed to update: ' + response.message);
+    }
+});
+
+// Delete Streaming Account
+async function handleDeleteStreamingAccount(e) {
+    const row = e.target.closest('tr');
+    const id = row.dataset.id;
+
+    if (!confirm('Are you sure you want to delete this account?')) return;
+
+    const response = await deleteAdminStreamingAccount(id);
+    if (response.success) {
+        alert('Account deleted!');
+        loadStreamingAccounts();
+    } else {
+        alert('Failed to delete: ' + response.message);
+    }
+}
 
 // Service Worker Registration for PWA
 if ('serviceWorker' in navigator) {
@@ -2229,4 +2673,6 @@ if ('serviceWorker' in navigator) {
             console.log('ServiceWorker registration failed: ', err);
         });
     });
+} else {
+    console.log('ServiceWorker is not supported in this browser.');
 }

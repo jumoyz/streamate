@@ -1,6 +1,45 @@
-// File: scripts/messages.js
+/**
+ * Messaging Module
+ * Handles user feedback and support messages
+ */
 import { apiRequest } from './api.js';
 import { formatNotificationDate } from './utils.js';
+
+async function handleFeedbackSubmit(e) {
+    e.preventDefault();
+    
+    const form = document.getElementById('feedbackForm');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    
+    try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+        
+        const feedbackData = {
+            name: document.getElementById('feedbackFirstName').value,
+            email: document.getElementById('feedbackEmail').value,
+            subject: document.getElementById('feedbackSubject').value,
+            message: document.getElementById('feedbackMessage').value,
+            user_id: currentUser?.id || null
+        };
+        
+        const response = await apiRequest('submit_feedback', 'POST', feedbackData);
+        
+        if (response.success) {
+            alert('Thank you for your feedback! We will get back to you soon.');
+            form.reset();
+        } else {
+            throw new Error(response.message || 'Failed to submit feedback');
+        }
+    } catch (error) {
+        console.error('Feedback submission error:', error);
+        alert('Failed to submit feedback. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    }
+}
 
 $(document).ready(function() {
     // Initialize select2 for recipient selection
@@ -56,3 +95,9 @@ $(document).ready(function() {
         }
     });
 });
+
+
+export {
+    handleFeedbackSubmit
+    // ... other exports
+};

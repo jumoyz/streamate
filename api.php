@@ -802,6 +802,34 @@ try {
             }
             break;
 
+        case 'admin_add_subscription':
+            $data = json_decode(file_get_contents('php://input'), true);
+            $userId = $data['user_id'] ?? 0;
+            $planId = $data['plan_id'] ?? 0;
+            $startDate = date('Y-m-d');
+            $endDate = date('Y-m-d', strtotime('+1 month'));
+
+            // Check if user exists
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            
+            if (!$stmt->fetch()) {
+                $response['message'] = 'User not found';
+            } else {
+                // Create subscription
+                $stmt = $pdo->prepare("
+                    INSERT INTO subscriptions (user_id, plan_id, start_date, end_date, status)
+                    VALUES (?, ?, ?, ?, 'active')
+                ");
+                $stmt->execute([$userId, $planId, $startDate, $endDate]);
+                
+                $response = [
+                    'success' => true,
+                    'message' => 'Subscription created successfully'
+                ];
+            }
+            break;
+
         case 'admin_cancel_subscription':
             $data = json_decode(file_get_contents('php://input'), true);
             $subscriptionId = $data['subscription_id'] ?? 0;
@@ -1204,8 +1232,112 @@ try {
                 'message' => 'Plan updated successfully'
             ];
             break;
-
+        
+        case 'admin_get_streaming_accounts':
+            $stmt = $pdo->query("SELECT * FROM streaming_accounts ORDER BY service_name ASC");
+            $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $response = [
+                'success' => true,
+                'data' => $accounts
+            ];
+            break;
  
+        case 'admin_add_streaming_account':
+            $data = json_decode(file_get_contents('php://input'), true);
+            $serviceName = $data['service_name'] ?? '';
+            $accountName = $data['account_name'] ?? '';
+            $email = $data['email'] ?? '';
+            $plan = $data['plan'] ?? '';
+            $profileCount = $data['profile_count'] ?? 0;
+            $extraMembers = $data['extra_members'] ?? 0;
+            $cost = $data['cost'] ?? 0.0;
+            $startDate = date('Y-m-d H:i:s');
+            $renewDate = date('Y-m-d H:i:s');
+            $status = 'active';
+
+            $stmt = $pdo->prepare("
+                INSERT INTO streaming_accounts 
+                    (service_name, account_name, email, plan, profile_count, extra_members, cost, start_date, renew_date, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $serviceName,
+                $accountName,
+                $email,
+                $plan,
+                $profileCount,
+                $extraMembers,
+                $cost,
+                $startDate,
+                $renewDate,
+                $status
+            ]);
+
+            $response = [
+                'success' => true,
+                'message' => 'Streaming account added successfully'
+            ];
+            break;
+        
+        case 'admin_delete_streaming_account':
+            $accountId = $_POST['account_id'] ?? 0;
+
+            // Check if account exists
+            $stmt = $pdo->prepare("SELECT id FROM streaming_accounts WHERE id = ?");
+            $stmt->execute([$accountId]);
+
+            if (!$stmt->fetch()) {
+                $response['message'] = 'Account not found';
+            } else {
+                $stmt = $pdo->prepare("DELETE FROM streaming_accounts WHERE id = ?");
+                $stmt->execute([$accountId]);
+
+                $response = [
+                    'success' => true,
+                    'message' => 'Streaming account deleted successfully'
+                ];
+            }
+            break;
+
+        case 'admin_edit_streaming_account':
+            $data = json_decode(file_get_contents('php://input'), true);
+            $accountId = $data['id'] ?? 0;
+            $serviceName = $data['service_name'] ?? '';
+            $accountName = $data['account_name'] ?? '';
+            $email = $data['email'] ?? '';
+            $plan = $data['plan'] ?? '';
+            $profileCount = $data['profile_count'] ?? 0;
+            $extraMembers = $data['extra_members'] ?? 0;
+            $cost = $data['cost'] ?? 0.0;
+            $startDate = $data['start_date'] ?? date('Y-m-d H:i:s');
+            $renewDate = $data['renew_date'] ?? date('Y-m-d H:i:s');
+            $status = $data['status'] ?? 'active';
+
+            $stmt = $pdo->prepare("
+                UPDATE streaming_accounts 
+                SET service_name = ?, account_name = ?, email = ?, plan = ?, profile_count = ?, 
+                    extra_members = ?, cost = ?, start_date = ?, renew_date = ?, status = ?
+                WHERE id = ?
+            ");
+            $stmt->execute([
+                $serviceName,
+                $accountName,
+                $email,
+                $plan,
+                $profileCount,
+                $extraMembers,
+                $cost,
+                $startDate,
+                $renewDate,
+                $status,
+                $accountId
+            ]); 
+            $response = [
+                'success' => true,
+                'message' => 'Streaming account updated successfully'
+            ];
+            break;
 
         default:
             $response['message'] = 'Invalid action';

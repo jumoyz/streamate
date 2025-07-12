@@ -50,15 +50,44 @@ Chart.js: Destroy and re-create charts properly to avoid memory leaks.
 Summary:
 Your code is functional and covers many features, but splitting it into modules, improving event handling, and enhancing UI/UX will make it more maintainable and scalable. Consider these recommendations as you continue development!
 
-For code organization and modularity, I've splitted app.js into 10 modules: 
-api.js - codes already generated, need your review
-auth.js - codes already generated, need your review
-admin.js - codes already generated, need your review
-user.js - codes already generated, need your review
-ui.js - generate codes
-main.js - generate codes
-utils.js - generate codes
-notifications.js - generate codes
-news.js - generate codes
-charts.js - generate codes
+I would like to splitte my app.js into 13 modules, for code organization, modularity and maintainability.
+api.js 
+ui.js 
+main.js
+utils.js
+auth.js 
+admin.js 
+user.js 
+notifications.js 
+messages.js 
+news.js 
+charts.js 
+settings.js
 
+
+main.js: Will become the primary entry point for the application, handling initialization, state management, and event listeners.
+api.js: A centralized module for all communications with your PHP backend.
+auth.js: Manages all authentication logic, including login, signup, logout, and session checking.
+user.js: Contains functions related to the user-facing parts of the app, like loading user data, managing subscriptions, and handling profile updates.
+admin.js: Holds all functionality for the admin dashboard.
+ui.js: Contains functions responsible for rendering UI components, separating the "how" from the "what".
+utils.js: A collection of helper utilities used across the application.
+notifications.js: Manages fetching, displaying, and interacting with user notifications.
+news.js: Handles the logic for fetching news, tips, and
+
+
+| #  | File               | Purpose                                                     |
+| -- | ------------------ | ----------------------------------------------------------- |
+| 1  | `api.js`           | All `apiRequest()` and API wrapper functions                |
+| 2  | `utils.js`         | Utility functions (`formatDate`, `getMobilePlatform`, etc.) |
+| 3  | `ui.js`            | DOM manipulation and view rendering logic                   |
+| 4  | `main.js`          | App entry point, initial `DOMContentLoaded` handling        |
+| 5  | `auth.js`          | Login, signup, logout, check auth, handle auth forms        |
+| 6  | `admin.js`         | Admin dashboard loading and logic                           |
+| 7  | `user.js`          | User dashboard and profile handling                         |
+| 8  | `notifications.js` | All notification logic and polling                          |
+| 9  | `messages.js`      | Feedback/contact/message support                            |
+| 10 | `news.js`          | News, tips, FAQs and recommendations                        |
+| 11 | `charts.js`        | Chart.js logic for admin dashboard                          |
+| 12 | `settings.js`      | Admin and user settings management                          |
+| 13 | `streaming.js`     | Streaming account management (CRUD)                         |

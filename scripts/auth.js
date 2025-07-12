@@ -1,4 +1,48 @@
-import { loginUser, registerUser } from './api.js';
+/**
+ * Authentication Module
+ * Handles user authentication, registration, and session management
+ */
+import { apiRequest, loginUser, registerUser } from './api.js';
+
+// Show login view
+function showLogin() {
+    document.getElementById('loginView').style.display = 'block';
+    document.getElementById('signupView').style.display = 'none';
+}
+
+// Show signup view
+function showSignup() {
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('signupView').style.display = 'block';
+}
+
+// Check authentication status
+function checkAuthStatus() {
+    const userData = localStorage.getItem('currentUser');
+    if (userData) {
+        currentUser = JSON.parse(userData);
+        authViews.style.display = 'none';
+        appViews.style.display = 'block';
+        
+        if (currentUser.is_admin) {
+            userApp.style.display = 'none';
+            adminApp.style.display = 'block';
+            isAdmin = true;
+            loadAdminData();
+        } else {
+            userApp.style.display = 'block';
+            adminApp.style.display = 'none';
+            isAdmin = false;
+            loadUserData();
+        }
+        
+        navigateTo('home');
+    } else {
+        authViews.style.display = 'block';
+        appViews.style.display = 'none';
+        showLogin();
+    }
+}
 
 // Check authentication status
 export function isAuthenticated() {
@@ -106,3 +150,13 @@ export function showSignup() {
     document.getElementById('signupView').style.display = 'block';
     document.getElementById('dashboardView').style.display = 'none';
 }
+
+
+// ... other auth functions
+
+export {
+    showLogin,
+    showSignup,
+    checkAuthStatus
+    // ... other exports
+};

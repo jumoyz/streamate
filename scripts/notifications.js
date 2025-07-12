@@ -1,5 +1,11 @@
+/**
+ * Notifications Module
+ * Handles all notification-related functionality
+ */
 import { apiRequest } from './api.js';
 import { formatNotificationDate } from './utils.js';
+
+let unreadNotificationCount = 0;
 
 export async function fetchNotifications(userId, limit = 10, unreadOnly = false) {
     // ...move your fetchNotifications code here, pass userId as param...
@@ -100,3 +106,9 @@ export function handleNotificationAction(notification) {
             alert(`${notification.title}\n\n${notification.message}`);
     }
 }
+
+export {
+    fetchNotifications,
+    unreadNotificationCount
+    // ... other exports
+};
